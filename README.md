@@ -8,11 +8,7 @@ This is an offshoot of a previous uni assignment - a chess game but with knights
 
 Development/testing:
 
--   Startup virtual env and go to src directory: `.\v.ps1`
 -   Run python main file: `.\run.ps1`
-
-The following scripts facilitate some common actions:
-
 -   Create Python virtual environment: run `.\create_venv.ps1`
 -   Activate Python virtual environment: `.\activate_venv.ps1`
 -   Build main file/executable: `.\build_main.ps1`
