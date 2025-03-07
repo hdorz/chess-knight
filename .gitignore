@@ -1,0 +1,19 @@
+# Python virtual environment
+.venv
+
+# Pyinstaller build files and executable
+build/
+dist/
+*.spec
+
+# Python miscellaneous files
+__pycache__/
+
+# log files
+*.log
+
+# Pycharm settings
+.idea/
+
+# Save file
+save.cfg
