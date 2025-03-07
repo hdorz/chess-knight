@@ -4,6 +4,8 @@ This is an offshoot of a previous uni assignment - a chess game but with knights
 
 (More pieces to be considered?)
 
+![screenshot of the game](./screenshot-1.png)
+
 ## Quick Setup
 
 Development/testing:
@@ -37,7 +39,7 @@ python3.12 -m venv .venv
 pip install -r requirements.txt
 ```
 
--   Install linting requirements (if not using VSCode):
+-   Install linting requirements:
 
 ```
 pip install -r requirements_linting.txt
@@ -50,7 +52,7 @@ References:
 -   https://stackoverflow.com/questions/54210392/how-can-i-convert-pygame-to-exe
 -   https://pyinstaller.org/en/stable/usage.html
 
-Use `pyinstaller` module to create an executable file of the game project
+Use `pyinstaller` module to create an executable file of the game project.
 
 Run the build command with the `--noconsole` flag to stop the terminal window from appearing during runtime.
 
