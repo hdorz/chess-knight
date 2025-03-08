@@ -14,7 +14,8 @@ black .\
 Write-Host "Black done." -f Green
 
 Write-Host "Running isort..." -f Green
-isort --profile black . --check-only
+Write-Host "Showing isort filtered output..." -f Green
+isort --profile black . --check-only -v | Select-String ".*C:.*|.*(S|s)kipped.*"
 isort --profile black .
 Write-Host "isort done." -f Green
 
