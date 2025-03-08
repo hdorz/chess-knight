@@ -38,8 +38,10 @@ class Board(SaveLoadMixin):
 
     def selectPiece(self, knight: Knight):
         self.selectedPiece = knight
+        self.selectedPiece.highlight()
 
     def deselectPiece(self):
+        self.selectedPiece.stopHighlight()
         self.selectedPiece.highlightTiles(highlight=False)
         self.selectedPiece = None
 
