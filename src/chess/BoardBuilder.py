@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from .Board import Board
-from .Knight import Knight
+from .Piece import Piece
 from .Player import Player
 from .Tile import Tile
 
@@ -20,7 +20,7 @@ class BoardBuilder(ABC):
         pass
 
     @abstractmethod
-    def setKnights(self, knights: list[Knight]):
+    def setPieces(self, pieces: list[Piece]):
         pass
 
     @abstractmethod
@@ -42,8 +42,8 @@ class StandardBoardBuilder(BoardBuilder):
     def setTiles(self, spaces: list[Tile]):
         self.board.setTiles(spaces)
 
-    def setKnights(self, knights: list[Knight]):
-        self.board.setKnights(knights)
+    def setPieces(self, pieces: list[Piece]):
+        self.board.setPieces(pieces)
 
     def setPlayers(self, players: dict[str, Player]):
         self.board.setPlayers(players)

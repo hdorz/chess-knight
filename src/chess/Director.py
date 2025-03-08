@@ -1,10 +1,14 @@
 import configparser
 from math import sqrt
+from typing import Type
 
 from .Board import Board
 from .BoardBuilder import BoardBuilder
+from .BoardConfig import BoardConfig
+from .BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
 from .engine.constants import PLAYER_1, PLAYER_2, windowSize
 from .Knight import Knight
+from .Piece import Piece, TPiece
 from .Player import Player
 from .Tile import Tile
 
@@ -191,40 +195,83 @@ class Director:
 
         return knights
 
-    def _createKnightsFromSaveData(
-        self, tiles: list[Tile], knightsSaveData
-    ) -> list[Knight]:
-        knights: Knight = []
-        for kConfig in knightsSaveData:
-            knight = Knight(
-                playerName=kConfig["playerName"],
-                fileName=kConfig["fileName"],
-                team=kConfig["team"],
-                objectName=kConfig["objectName"],
+    def _createPiecesFromConfig(
+        self, tiles: list[Tile], pieceConfigs: list[dict]
+    ) -> list[TPiece]:
+        pieces: list[TPiece] = []
+        for pConfig in pieceConfigs:
+            pieceClass: Type[TPiece] = pConfig["class"]
+            piece = pieceClass(
+                playerName=pConfig["playerName"],
+                fileName=pConfig["fileName"],
+                team=pConfig["team"],
+                objectName=pConfig["objectName"],
             )
-            knight.setTimesMoved(kConfig["timesMoved"])
-            knight.setClaimedPieces(kConfig["claimedPieces"])
+            piece.setTimesMoved(pConfig["timesMoved"])
+            piece.setClaimedPieces(pConfig["claimedPieces"])
 
             tileNumber: int | None = (
-                kConfig["space"] if (kConfig["space"] is not None) else None
+                pConfig["space"] if (pConfig["space"] is not None) else None
             )
 
             if tileNumber is not None:
-                knight.setSpace(tiles[tileNumber])
-                tiles[tileNumber].placePiece(knight)
+                piece.setSpace(tiles[tileNumber])
+                tiles[tileNumber].placePiece(piece)
 
-            knights.append(knight)
+            pieces.append(piece)
 
         width = self._getTileSpriteWidth(len(tiles))
-        self._resizeSprites(knights, width)
+        self._resizeSprites(pieces, width)
 
-        for knight in knights:
-            if knight.getIsOnBoard():
-                knight.setCoord(knight.getSpace().getCoord())
+        for piece in pieces:
+            if piece.getIsOnBoard():
+                piece.setCoord(piece.getSpace().getCoord())
 
-        return knights
+        return pieces
 
-    def getPlayerConfig(self) -> dict[str, Player]:
+    def _createKnightsFromSaveData(
+        self, tiles: list[Tile], knightsSaveData: list[dict]
+    ) -> list[Knight]:
+        return self._createPiecesFromSaveData(
+            tiles=tiles,
+            pieceClass=Knight,
+            piecesSaveData=knightsSaveData,
+        )
+
+    def _createPiecesFromSaveData(
+        self, tiles: list[Tile], pieceClass: Type[TPiece], piecesSaveData: list[dict]
+    ) -> list[TPiece]:
+        pieces: list[TPiece] = []
+        for pConfig in piecesSaveData:
+            piece = pieceClass(
+                playerName=pConfig["playerName"],
+                fileName=pConfig["fileName"],
+                team=pConfig["team"],
+                objectName=pConfig["objectName"],
+            )
+            piece.setTimesMoved(pConfig["timesMoved"])
+            piece.setClaimedPieces(pConfig["claimedPieces"])
+
+            tileNumber: int | None = (
+                pConfig["space"] if (pConfig["space"] is not None) else None
+            )
+
+            if tileNumber is not None:
+                piece.setSpace(tiles[tileNumber])
+                tiles[tileNumber].placePiece(piece)
+
+            pieces.append(piece)
+
+        width = self._getTileSpriteWidth(len(tiles))
+        self._resizeSprites(pieces, width)
+
+        for piece in pieces:
+            if piece.getIsOnBoard():
+                piece.setCoord(piece.getSpace().getCoord())
+
+        return pieces
+
+    def _createPlayers(self) -> dict[str, Player]:
         return {
             PLAYER_1: Player(name=PLAYER_1),
             PLAYER_2: Player(name=PLAYER_2),
@@ -246,19 +293,43 @@ class Director:
         return currentPlayer
 
     def createStandardBoard(self, boardBuilder: BoardBuilder):
+        # self._createNewStandardBoardWithKnightsOnly(boardBuilder=boardBuilder)
+        self._createNewStandardBoardFromConfig(boardBuilder=boardBuilder)
+
+    def _createNewStandardBoardWithKnightsOnly(self, boardBuilder: BoardBuilder):
         """
-        Create a standard configuration for the board.
+        Create a standard configuration for the board with knights only.
         """
+        print("_createNewStandardBoardWithKnightsOnly")
         tiles = self._createTiles(64)
         self._linkTiles(tiles)
         self._setTileCoords(tiles)
 
         knights = self._createKnights(tiles)
 
-        players = self.getPlayerConfig()
+        players = self._createPlayers()
 
         boardBuilder.setTiles(tiles)
-        boardBuilder.setKnights(knights)
+        boardBuilder.setPieces(knights)
+        boardBuilder.setPlayers(players)
+
+    def _createNewStandardBoardFromConfig(self, boardBuilder: BoardBuilder):
+        """
+        Create a standard configuration for the board.
+        """
+        print("_createNewStandardBoardFromConfig")
+        tiles = self._createTiles(64)
+        self._linkTiles(tiles)
+        self._setTileCoords(tiles)
+
+        pieceConfigs = BoardConfig.getPieceConfigs()
+
+        pieces = self._createPiecesFromConfig(tiles, pieceConfigs)
+
+        players = self._createPlayers()
+
+        boardBuilder.setTiles(tiles)
+        boardBuilder.setPieces(pieces)
         boardBuilder.setPlayers(players)
 
     def _getSectionLength(self, config, section):
@@ -273,25 +344,26 @@ class Director:
         return saveData
 
     def createStandardBoardFromSaveData(self, boardBuilder: BoardBuilder):
+        print("createStandardBoardFromSaveData")
         config = configparser.RawConfigParser()
         config.read("save.cfg")
 
-        numberOfTiles = self._getSectionLength(config, "tiles")
+        numberOfTiles = self._getSectionLength(config, cfgKeys.TILES)
         tiles = self._createTiles(numberOfTiles)
         self._linkTiles(tiles)
         self._setTileCoords(tiles)
 
-        knightsSaveData = self._loadSectionData(config, "knights")
+        knightsSaveData = self._loadSectionData(config, cfgKeys.KNIGHTS)
         knights = self._createKnightsFromSaveData(tiles, knightsSaveData)
 
-        playersSaveData = self._loadSectionData(config, "players")
+        playersSaveData = self._loadSectionData(config, cfgKeys.PLAYERS)
         players = self._createPlayersFromSaveData(playersSaveData)
 
-        boardSaveData = self._loadSectionData(config, "board")
+        boardSaveData = self._loadSectionData(config, cfgKeys.BOARD)
         currentPlayer = self._getCurrentPlayerFromSaveData(boardSaveData)
 
         boardBuilder.setTiles(tiles)
-        boardBuilder.setKnights(knights)
+        boardBuilder.setPieces([*knights])
         boardBuilder.setPlayers(players)
         boardBuilder.setCurrentPlayer(currentPlayer)
 

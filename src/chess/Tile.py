@@ -25,7 +25,7 @@ class Tile(Space):
             self.piece = piece
             self.isNowOccupied()
             return True
-        return False
+        raise Exception(f"Tile {self.number} is already occupied!")
 
     def removePiece(self) -> bool:
         self.piece = None

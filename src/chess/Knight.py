@@ -1,9 +1,8 @@
-from .engine.SaveLoadMixin import SaveLoadMixin
 from .Piece import Piece
 from .Space import Space
 
 
-class Knight(Piece, SaveLoadMixin):
+class Knight(Piece):
     def __init__(
         self,
         fileName: str = "knight_white",
@@ -52,21 +51,3 @@ class Knight(Piece, SaveLoadMixin):
                     space.highlight()
                 else:
                     space.stopHighlight()
-
-    def save(self, **kwargs):
-        config = self.getParser()
-        pieceState = {
-            "fileName": self.fileName,
-            "playerName": self.playerName,
-            "objectName": self.objectName,
-            "space": (
-                self.space.getNumber()
-                if (self.space is not None and self.isOnBoard)
-                else None
-            ),
-            "team": self.team,
-            "timesMoved": self.timesMoved,
-            "claimedPieces": self.claimedPieces,
-            "isOnBoard": self.isOnBoard,
-        }
-        config.set("knights", f"{kwargs['number']}", pieceState)

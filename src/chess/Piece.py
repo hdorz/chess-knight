@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from typing import TypeVar
 
+from .engine.SaveLoadMixin import SaveLoadMixin
 from .engine.SpriteImage import SpriteImage
 from .Space import Space
 
 
-class Piece(SpriteImage):
+class Piece(SpriteImage, SaveLoadMixin):
     def __init__(
         self,
         fileName: str = "knight_white",
@@ -40,6 +42,9 @@ class Piece(SpriteImage):
         self.movementSpeed = 30
 
         self.type = "defaultPiece"
+
+    def __str__(self):
+        return self.objectName
 
     @abstractmethod
     def findTiles(self, highlight: bool = False):
@@ -116,3 +121,27 @@ class Piece(SpriteImage):
 
             return True
         return False
+
+    def save(self, **kwargs):
+        config = self.getParser()
+        pieceState = {
+            "fileName": self.fileName,
+            "playerName": self.playerName,
+            "objectName": self.objectName,
+            "space": (
+                self.space.getNumber()
+                if (self.space is not None and self.isOnBoard)
+                else None
+            ),
+            "team": self.team,
+            "timesMoved": self.timesMoved,
+            "claimedPieces": self.claimedPieces,
+            "isOnBoard": self.isOnBoard,
+        }
+        # config.set("knights", f"{kwargs['number']}", pieceState)
+        config.set(
+            str(type(self).__name__).lower() + "s", f"{kwargs['number']}", pieceState
+        )
+
+
+TPiece = TypeVar("TPiece", bound=Piece)

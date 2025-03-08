@@ -1,6 +1,6 @@
 ## Blurb
 
-This is an offshoot of a previous uni assignment - a chess game but with knights.
+This is an offshoot of a previous uni assignment - a (very crude) chess game but with knights.
 
 (More pieces to be considered?)
 

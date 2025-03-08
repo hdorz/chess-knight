@@ -232,9 +232,12 @@ class NewScreenState(InitialiseState):
                         s.gameSprites = SpriteGroup(
                             [
                                 *s.board.getTiles(),
-                                *s.board.getKnights(),
+                                *s.board.getPieces(),
                             ]
                         )
+
+                        print(f"Number of knights: {len(s.board.getKnights())}")
+                        print([str(knight) for knight in s.board.getKnights()])
 
                         s.currentPlayerSurface.setCurrentPlayer(
                             s.board.getCurrentPlayer().getName()
@@ -248,9 +251,9 @@ class NewScreenState(InitialiseState):
                                 s.playerSurfacesDict[player.getName()].incrementPoints(
                                     player.getPoints()
                                 )
-                            for knight in s.board.getKnights():
-                                if not knight.getIsOnBoard():
-                                    knight.kill()
+                            for piece in s.board.getPieces():
+                                if not piece.getIsOnBoard():
+                                    piece.kill()
 
                         s.notification.push("Starting game!")
 

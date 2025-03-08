@@ -1,5 +1,9 @@
+from typing import Type
+
+from .BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
 from .engine.SaveLoadMixin import SaveLoadMixin
 from .Knight import Knight
+from .Piece import Piece, TPiece
 from .Player import Player
 from .Tile import Tile
 
@@ -7,7 +11,7 @@ from .Tile import Tile
 class Board(SaveLoadMixin):
     def __init__(self, players: dict[str, Player] | None = None) -> None:
         self.tiles = None
-        self.knights = None
+        self.pieces = None
         self.gameWon = False
         self.selectedPiece = None
         self.selectedTile = None
@@ -41,11 +45,21 @@ class Board(SaveLoadMixin):
     def getSelectedPiece(self) -> Knight:
         return self.selectedPiece
 
-    def getKnights(self):
-        return self.knights
+    def getPieces(self) -> list[Piece]:
+        return self.pieces
 
-    def setKnights(self, knights: list[Knight]):
-        self.knights = knights
+    def setPieces(self, pieces: list[Piece]):
+        self.pieces = pieces
+
+    def getKnights(self) -> list[Knight]:
+        return self._getPiecesByType(Knight)
+
+    def _getPiecesByType(self, pieceClass: Type[TPiece]) -> list[TPiece]:
+        return [
+            piece
+            for piece in self.pieces
+            if type(piece).__name__ == pieceClass.__name__
+        ]
 
     def getTiles(self):
         return self.tiles
@@ -87,22 +101,29 @@ class Board(SaveLoadMixin):
     def save(self, **kwargs):
         config = self.getParser()
 
-        sections = ["tiles", "knights", "players", "board"]
+        sections = [
+            cfgKeys.TILES,
+            cfgKeys.KNIGHTS,
+            cfgKeys.PLAYERS,
+            cfgKeys.BOARD,
+        ]
         for section in sections:
             if config.has_section(section):
                 config.remove_section(section)
             config.add_section(section)
 
-        config.set("tiles", "length", len(self.tiles))
-        config.set("knights", "length", len(self.knights))
-        config.set("players", "length", len(self.players.values()))
-        config.set("board", "length", 1)
+        knights: list[Knight] = self.getKnights()
+
+        config.set(cfgKeys.TILES, "length", len(self.tiles))
+        config.set(cfgKeys.KNIGHTS, "length", len(knights))
+        config.set(cfgKeys.PLAYERS, "length", len(self.players.values()))
+        config.set(cfgKeys.BOARD, "length", 1)
 
         boardState = {"currentPlayer": str(self.getCurrentPlayer().getName())}
-        config.set("board", "0", boardState)
+        config.set(cfgKeys.BOARD, "0", boardState)
 
-        for number in range(0, len(self.knights)):
-            self.knights[number].save(number=number)
+        for number in range(0, len(knights)):
+            knights[number].save(number=number)
 
         for number in range(0, len(self.players.values())):
             [p for p in self.players.values()][number].save(number=number)
