@@ -6,7 +6,7 @@ This is an offshoot of a previous uni assignment - a (very crude) chess game but
 
 ![screenshot of the game](./screenshot-1.png)
 
-## Quick Setup
+## Quick Setup (on Windows-based machine)
 
 Development/testing:
 
@@ -37,12 +37,6 @@ python3.12 -m venv .venv
 
 ```
 pip install -r requirements.txt
-```
-
--   Install linting requirements:
-
-```
-pip install -r requirements_linting.txt
 ```
 
 ## Generating executable file (.exe)
