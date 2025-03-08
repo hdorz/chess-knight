@@ -5,6 +5,7 @@ from .engine.SaveLoadMixin import SaveLoadMixin
 from .Knight import Knight
 from .Piece import Piece, TPiece
 from .Player import Player
+from .Rook import Rook
 from .Tile import Tile
 
 
@@ -39,7 +40,7 @@ class Board(SaveLoadMixin):
         self.selectedPiece = knight
 
     def deselectPiece(self):
-        self.selectedPiece.findTiles(highlight=False)
+        self.selectedPiece.highlightTiles(highlight=False)
         self.selectedPiece = None
 
     def getSelectedPiece(self) -> Knight:
@@ -53,6 +54,9 @@ class Board(SaveLoadMixin):
 
     def getKnights(self) -> list[Knight]:
         return self._getPiecesByType(Knight)
+
+    def getRooks(self) -> list[Rook]:
+        return self._getPiecesByType(Rook)
 
     def _getPiecesByType(self, pieceClass: Type[TPiece]) -> list[TPiece]:
         return [
@@ -69,7 +73,7 @@ class Board(SaveLoadMixin):
 
     def highlightPotentialTiles(self):
         if self.isAPieceSelected():
-            self.selectedPiece.findTiles(highlight=True)
+            self.selectedPiece.highlightTiles(highlight=True)
 
     def setPlayers(self, players: dict[str, Player]):
         self.players = players
@@ -104,6 +108,7 @@ class Board(SaveLoadMixin):
         sections = [
             cfgKeys.TILES,
             cfgKeys.KNIGHTS,
+            cfgKeys.ROOKS,
             cfgKeys.PLAYERS,
             cfgKeys.BOARD,
         ]
@@ -113,9 +118,11 @@ class Board(SaveLoadMixin):
             config.add_section(section)
 
         knights: list[Knight] = self.getKnights()
+        rooks: list[Rook] = self.getRooks()
 
         config.set(cfgKeys.TILES, "length", len(self.tiles))
         config.set(cfgKeys.KNIGHTS, "length", len(knights))
+        config.set(cfgKeys.ROOKS, "length", len(rooks))
         config.set(cfgKeys.PLAYERS, "length", len(self.players.values()))
         config.set(cfgKeys.BOARD, "length", 1)
 
@@ -124,6 +131,8 @@ class Board(SaveLoadMixin):
 
         for number in range(0, len(knights)):
             knights[number].save(number=number)
+        for number in range(0, len(rooks)):
+            rooks[number].save(number=number)
 
         for number in range(0, len(self.players.values())):
             [p for p in self.players.values()][number].save(number=number)

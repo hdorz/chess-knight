@@ -17,7 +17,7 @@ from .engine.Display import DisplayInstance
 from .engine.EventManager import EventManagerInstance, Events
 from .engine.Notification import NotificationInstance
 from .engine.SpriteGroup import SpriteGroup
-from .Knight import Knight
+from .Piece import Piece
 from .Tile import Tile
 from .TriggerKey import TriggerKey
 from .Turn import MovePieceTurn, SelectPieceTurn
@@ -147,7 +147,7 @@ class GameRunningState(InitialiseState):
                     spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
                 ]
                 for sprite in clickedSprites:
-                    if isinstance(sprite, Knight):
+                    if isinstance(sprite, Piece):
                         s.selectPieceTurn.execute(sprite)
                     elif isinstance(sprite, Tile):
                         s.movePieceTurn.execute(sprite)

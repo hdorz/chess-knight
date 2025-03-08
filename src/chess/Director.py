@@ -8,8 +8,9 @@ from .BoardConfig import BoardConfig
 from .BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
 from .engine.constants import PLAYER_1, PLAYER_2, windowSize
 from .Knight import Knight
-from .Piece import Piece, TPiece
+from .Piece import TPiece
 from .Player import Player
+from .Rook import Rook
 from .Tile import Tile
 
 boardDistanceEdgeToCentre = windowSize[1] * 0.4
@@ -193,6 +194,9 @@ class Director:
         for knight in knights:
             knight.setCoord(knight.getSpace().getCoord())
 
+        for knight in knights:
+            knight.findAndRememberPotentialTiles()
+
         return knights
 
     def _createPiecesFromConfig(
@@ -227,6 +231,10 @@ class Director:
             if piece.getIsOnBoard():
                 piece.setCoord(piece.getSpace().getCoord())
 
+        for piece in pieces:
+            if piece.getIsOnBoard():
+                piece.findAndRememberPotentialTiles()
+
         return pieces
 
     def _createKnightsFromSaveData(
@@ -236,6 +244,15 @@ class Director:
             tiles=tiles,
             pieceClass=Knight,
             piecesSaveData=knightsSaveData,
+        )
+
+    def _createRooksFromSaveData(
+        self, tiles: list[Tile], rooksSaveData: list[dict]
+    ) -> list[Rook]:
+        return self._createPiecesFromSaveData(
+            tiles=tiles,
+            pieceClass=Rook,
+            piecesSaveData=rooksSaveData,
         )
 
     def _createPiecesFromSaveData(
@@ -268,6 +285,10 @@ class Director:
         for piece in pieces:
             if piece.getIsOnBoard():
                 piece.setCoord(piece.getSpace().getCoord())
+
+        for piece in pieces:
+            if piece.getIsOnBoard():
+                piece.findAndRememberPotentialTiles()
 
         return pieces
 
@@ -356,6 +377,9 @@ class Director:
         knightsSaveData = self._loadSectionData(config, cfgKeys.KNIGHTS)
         knights = self._createKnightsFromSaveData(tiles, knightsSaveData)
 
+        rooksSaveData = self._loadSectionData(config, cfgKeys.ROOKS)
+        rooks = self._createRooksFromSaveData(tiles, rooksSaveData)
+
         playersSaveData = self._loadSectionData(config, cfgKeys.PLAYERS)
         players = self._createPlayersFromSaveData(playersSaveData)
 
@@ -363,7 +387,7 @@ class Director:
         currentPlayer = self._getCurrentPlayerFromSaveData(boardSaveData)
 
         boardBuilder.setTiles(tiles)
-        boardBuilder.setPieces([*knights])
+        boardBuilder.setPieces([*knights, *rooks])
         boardBuilder.setPlayers(players)
         boardBuilder.setCurrentPlayer(currentPlayer)
 

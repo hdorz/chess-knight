@@ -2,10 +2,10 @@ from .Piece import Piece
 from .Space import Space
 
 
-class Knight(Piece):
+class Rook(Piece):
     def __init__(
         self,
-        fileName: str = "knight_white",
+        fileName: str = "rook_white",
         relativeDir: str = "chess/data/piece/",
         scale: int = 0.47,
         coord: list = [0, 0],
@@ -27,29 +27,19 @@ class Knight(Piece):
         )
 
     def findAndRememberPotentialTiles(self):
-        paths = [
-            ["north", "north", "east"],
-            ["north", "north", "west"],
-            ["south", "south", "east"],
-            ["south", "south", "west"],
-            ["west", "west", "north"],
-            ["west", "west", "south"],
-            ["east", "east", "north"],
-            ["east", "east", "south"],
-        ]
+        paths = ["north", "south", "east", "west"]
         potentialSpaces: list[Space] = []
-        if self.getIsOnBoard():
-            for path in paths:
-                space = self.getSpace()
-                for direction in path:
-                    space = space.getAdjacentSpace(direction)
-                    if space is None:
-                        break
+        for direction in paths:
+            space = self.getSpace()
+
+            while space is not None:
+                space = space.getAdjacentSpace(direction)
                 if space is not None:
                     if space.isOccupied():
                         otherPiece: Piece = space.getPiece()
                         if otherPiece.getTeam() != self.getTeam():
                             potentialSpaces.append(space)
+                        break
                     else:
                         potentialSpaces.append(space)
 

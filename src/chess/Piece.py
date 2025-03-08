@@ -41,13 +41,18 @@ class Piece(SpriteImage, SaveLoadMixin):
 
         self.movementSpeed = 30
 
-        self.type = "defaultPiece"
+        self.type: str = type(self).__name__
+        self.potentialSpaces: list[Space] | None = None
 
     def __str__(self):
         return self.objectName
 
     @abstractmethod
-    def findTiles(self, highlight: bool = False):
+    def findAndRememberPotentialTiles(self):
+        pass
+
+    @abstractmethod
+    def highlightTiles(self, highlight: bool = False):
         pass
 
     def setTimesMoved(self, timesMoved: int):
@@ -68,13 +73,17 @@ class Piece(SpriteImage, SaveLoadMixin):
     def getfileName(self):
         return self.fileName
 
-    def getSpace(self):
+    def getSpace(self) -> Space | None:
         return self.space
+
+    def getPotentialSpaces(self) -> list[Space]:
+        return self.potentialSpaces
 
     def setSpace(self, newSpace: Space) -> bool:
         if not newSpace.isOccupied():
             self.isOnBoard = True
             self.space = newSpace
+            self.findAndRememberPotentialTiles()
             return True
         return False
 
@@ -90,12 +99,15 @@ class Piece(SpriteImage, SaveLoadMixin):
     def move(self, newSpace: Space) -> bool:
         if newSpace.isHighlighted():
             if not newSpace.isOccupied():
-                self.findTiles(highlight=False)
+                self.highlightTiles(highlight=False)
 
+                # remove piece from space
                 self.getSpace().removePiece()
 
+                # place piece on new space
                 self.setSpace(newSpace)
                 newSpace.placePiece(self)
+
                 self.updatePosition(self.getSpace().getCoord())
             else:
                 oldPiece: Piece = newSpace.getPiece()
@@ -106,11 +118,13 @@ class Piece(SpriteImage, SaveLoadMixin):
                 oldPiece.takeOffBoard()
                 oldPiece.kill()
 
-                self.findTiles(highlight=False)
+                self.highlightTiles(highlight=False)
 
+                # remove pieces from spaces
                 newSpace.removePiece()
                 self.getSpace().removePiece()
 
+                # place piece on new space
                 self.setSpace(newSpace)
                 newSpace.placePiece(self)
 

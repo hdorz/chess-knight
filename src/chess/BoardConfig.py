@@ -1,4 +1,5 @@
 from .Knight import Knight
+from .Rook import Rook
 
 
 class BoardConfig:
@@ -106,10 +107,10 @@ class BoardConfig:
                 "isOnBoard": True,
             },
             {
-                "class": Knight,
-                "fileName": "knight_black",
+                "class": Rook,
+                "fileName": "rook_black",
                 "playerName": "Player2",
-                "objectName": "knight_9",
+                "objectName": "rook_9",
                 "space": 9,
                 "team": "black",
                 "timesMoved": 0,
@@ -348,10 +349,10 @@ class BoardConfig:
                 "isOnBoard": True,
             },
             {
-                "class": Knight,
-                "fileName": "knight_white",
+                "class": Rook,
+                "fileName": "rook_white",
                 "playerName": "Player1",
-                "objectName": "knight_48",
+                "objectName": "rook_48",
                 "space": 48,
                 "team": "white",
                 "timesMoved": 0,

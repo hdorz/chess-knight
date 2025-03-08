@@ -38,10 +38,11 @@ class Notification:
         self.backgroundSurface = None
         self.textAlpha = 255
         self.backgroundAlpha = 255
-        self.msgPersistTime = 800  # milliseconds
+        self.msgPersistTime = 1000  # milliseconds
         self.lastMessageTime = pg.time.get_ticks()
         self.textCoord = notificationTextCoord
         self.backgroundCoord = notificationBackgroundCoord
+        self.fadeOutSpeed = 10
 
     def clear(self):
         """
@@ -92,7 +93,7 @@ class Notification:
         """
         currentTime = pg.time.get_ticks()
         if currentTime - self.lastMessageTime >= self.msgPersistTime:
-            self.textAlpha -= 3
+            self.textAlpha -= self.fadeOutSpeed
         self.textSurface.set_alpha(self.textAlpha)
         if self.textAlpha <= 0:
             self.message = ""
@@ -103,7 +104,7 @@ class Notification:
         """
         currentTime = pg.time.get_ticks()
         if currentTime - self.lastMessageTime >= self.msgPersistTime:
-            self.backgroundAlpha -= 3
+            self.backgroundAlpha -= self.fadeOutSpeed
         self.backgroundSurface.set_alpha(self.backgroundAlpha)
 
     def render(self):
