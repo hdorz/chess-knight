@@ -26,6 +26,9 @@ class Knight(Piece):
             team=team,
         )
 
+    def getPointsValue(self) -> int:
+        return 3
+
     def findAndRememberPotentialTiles(self):
         paths = [
             ["north", "north", "east"],

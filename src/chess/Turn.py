@@ -66,7 +66,7 @@ class MovePieceTurn(Turn):
                         event=Events.TAKE_PIECE_EVENT,
                         data={
                             "player": piece.getPlayerName(),
-                            "points": 1,
+                            "points": otherPiece.getPointsValue(),
                         },
                     )
                 else:

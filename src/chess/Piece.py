@@ -48,6 +48,10 @@ class Piece(SpriteImage, SaveLoadMixin):
         return self.objectName
 
     @abstractmethod
+    def getPointsValue(self) -> int:
+        pass
+
+    @abstractmethod
     def findAndRememberPotentialTiles(self):
         pass
 

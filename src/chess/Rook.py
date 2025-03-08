@@ -26,6 +26,9 @@ class Rook(Piece):
             team=team,
         )
 
+    def getPointsValue(self) -> int:
+        return 5
+
     def findAndRememberPotentialTiles(self):
         paths = ["north", "south", "east", "west"]
         potentialSpaces: list[Space] = []
