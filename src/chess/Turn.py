@@ -61,7 +61,9 @@ class MovePieceTurn(Turn):
                     notification.push(
                         f"{otherPiece.getObjectName()} was defeated by {piece.getObjectName()}"
                     )
-                    self.board.getCurrentPlayer().incrementPoints(otherPiece.getPointsValue())
+                    self.board.getCurrentPlayer().incrementPoints(
+                        otherPiece.getPointsValue()
+                    )
                     eventManager.post(
                         event=Events.TAKE_PIECE_EVENT,
                         data={

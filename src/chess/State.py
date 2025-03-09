@@ -245,6 +245,15 @@ class NewScreenState(InitialiseState):
                         print(f"Number of pawns: {len(s.board.getPawns())}")
                         print([str(pawn) for pawn in s.board.getPawns()])
 
+                        print(f"Number of bishops: {len(s.board.getBishops())}")
+                        print([str(bishop) for bishop in s.board.getBishops()])
+
+                        print(f"Number of queens: {len(s.board.getQueens())}")
+                        print([str(queen) for queen in s.board.getQueens()])
+
+                        print(f"Number of kings: {len(s.board.getKings())}")
+                        print([str(king) for king in s.board.getKings()])
+
                         s.currentPlayerSurface.setCurrentPlayer(
                             s.board.getCurrentPlayer().getName()
                         )
