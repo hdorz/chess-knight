@@ -5,5 +5,6 @@ class BoardConfigSectionKeys:
     PAWNS = "pawns"
     BISHOPS = "bishops"
     QUEENS = "queens"
+    KINGS = "kings"
     PLAYERS = "players"
     BOARD = "board"

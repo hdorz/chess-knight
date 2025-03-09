@@ -1,4 +1,5 @@
 from .Bishop import Bishop
+from .King import King
 from .Knight import Knight
 from .Pawn import Pawn
 from .Queen import Queen
@@ -55,10 +56,10 @@ class BoardConfig:
                 "isOnBoard": True,
             },
             {
-                "class": Knight,
-                "fileName": "knight_black",
+                "class": King,
+                "fileName": "king_black",
                 "playerName": "Player2",
-                "objectName": "knight_4",
+                "objectName": "king_4",
                 "space": 4,
                 "team": "black",
                 "timesMoved": 0,
@@ -220,10 +221,10 @@ class BoardConfig:
                 "isOnBoard": True,
             },
             {
-                "class": Knight,
-                "fileName": "knight_white",
+                "class": King,
+                "fileName": "king_white",
                 "playerName": "Player1",
-                "objectName": "knight_60",
+                "objectName": "king_60",
                 "space": 60,
                 "team": "white",
                 "timesMoved": 0,

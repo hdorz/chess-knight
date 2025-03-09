@@ -3,6 +3,7 @@ from typing import Type
 from .Bishop import Bishop
 from .BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
 from .engine.SaveLoadMixin import SaveLoadMixin
+from .King import King
 from .Knight import Knight
 from .Pawn import Pawn
 from .Piece import Piece, TPiece
@@ -72,6 +73,9 @@ class Board(SaveLoadMixin):
     def getQueens(self) -> list[Queen]:
         return self._getPiecesByType(Queen)
 
+    def getKings(self) -> list[King]:
+        return self._getPiecesByType(King)
+
     def _getPiecesByType(self, pieceClass: Type[TPiece]) -> list[TPiece]:
         return [
             piece
@@ -126,6 +130,7 @@ class Board(SaveLoadMixin):
             cfgKeys.PAWNS,
             cfgKeys.BISHOPS,
             cfgKeys.QUEENS,
+            cfgKeys.KINGS,
             cfgKeys.PLAYERS,
             cfgKeys.BOARD,
         ]
@@ -138,7 +143,8 @@ class Board(SaveLoadMixin):
         rooks: list[Rook] = self.getRooks()
         pawns: list[Pawn] = self.getPawns()
         bishops: list[Bishop] = self.getBishops()
-        queens: list[Bishop] = self.getQueens()
+        queens: list[Queen] = self.getQueens()
+        kings: list[King] = self.getKings()
 
         config.set(cfgKeys.TILES, "length", len(self.tiles))
         config.set(cfgKeys.KNIGHTS, "length", len(knights))
@@ -146,6 +152,7 @@ class Board(SaveLoadMixin):
         config.set(cfgKeys.PAWNS, "length", len(pawns))
         config.set(cfgKeys.BISHOPS, "length", len(bishops))
         config.set(cfgKeys.QUEENS, "length", len(queens))
+        config.set(cfgKeys.KINGS, "length", len(kings))
         config.set(cfgKeys.PLAYERS, "length", len(self.players.values()))
         config.set(cfgKeys.BOARD, "length", 1)
 
@@ -162,6 +169,8 @@ class Board(SaveLoadMixin):
             bishops[number].save(number=number)
         for number in range(0, len(queens)):
             queens[number].save(number=number)
+        for number in range(0, len(kings)):
+            kings[number].save(number=number)
 
         for number in range(0, len(self.players.values())):
             [p for p in self.players.values()][number].save(number=number)
