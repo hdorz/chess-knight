@@ -1,3 +1,4 @@
+from .Bishop import Bishop
 from .Knight import Knight
 from .Pawn import Pawn
 from .Rook import Rook
@@ -31,10 +32,10 @@ class BoardConfig:
                 "isOnBoard": True,
             },
             {
-                "class": Knight,
-                "fileName": "knight_black",
+                "class": Bishop,
+                "fileName": "bishop_black",
                 "playerName": "Player2",
-                "objectName": "knight_2",
+                "objectName": "bishop_2",
                 "space": 2,
                 "team": "black",
                 "timesMoved": 0,
@@ -64,10 +65,10 @@ class BoardConfig:
                 "isOnBoard": True,
             },
             {
-                "class": Knight,
-                "fileName": "knight_black",
+                "class": Bishop,
+                "fileName": "bishop_black",
                 "playerName": "Player2",
-                "objectName": "knight_5",
+                "objectName": "bishop_5",
                 "space": 5,
                 "team": "black",
                 "timesMoved": 0,
@@ -207,10 +208,10 @@ class BoardConfig:
                 "isOnBoard": True,
             },
             {
-                "class": Knight,
-                "fileName": "knight_white",
+                "class": Bishop,
+                "fileName": "bishop_white",
                 "playerName": "Player1",
-                "objectName": "knight_61",
+                "objectName": "bishop_61",
                 "space": 61,
                 "team": "white",
                 "timesMoved": 0,
@@ -240,10 +241,10 @@ class BoardConfig:
                 "isOnBoard": True,
             },
             {
-                "class": Knight,
-                "fileName": "knight_white",
+                "class": Bishop,
+                "fileName": "bishop_white",
                 "playerName": "Player1",
-                "objectName": "knight_58",
+                "objectName": "bishop_58",
                 "space": 58,
                 "team": "white",
                 "timesMoved": 0,

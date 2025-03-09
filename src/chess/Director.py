@@ -2,6 +2,7 @@ import configparser
 from math import sqrt
 from typing import Type
 
+from .Bishop import Bishop
 from .Board import Board
 from .BoardBuilder import BoardBuilder
 from .BoardConfig import BoardConfig
@@ -265,6 +266,15 @@ class Director:
             piecesSaveData=pawnsSaveData,
         )
 
+    def _createBishopsFromSaveData(
+        self, tiles: list[Tile], bishopsSaveData: list[dict]
+    ) -> list[Bishop]:
+        return self._createPiecesFromSaveData(
+            tiles=tiles,
+            pieceClass=Bishop,
+            piecesSaveData=bishopsSaveData,
+        )
+
     def _createPiecesFromSaveData(
         self, tiles: list[Tile], pieceClass: Type[TPiece], piecesSaveData: list[dict]
     ) -> list[TPiece]:
@@ -393,6 +403,9 @@ class Director:
         pawnsSaveData = self._loadSectionData(config, cfgKeys.PAWNS)
         pawns = self._createPawnsFromSaveData(tiles, pawnsSaveData)
 
+        bishopsSaveData = self._loadSectionData(config, cfgKeys.BISHOPS)
+        bishops = self._createBishopsFromSaveData(tiles, bishopsSaveData)
+
         playersSaveData = self._loadSectionData(config, cfgKeys.PLAYERS)
         players = self._createPlayersFromSaveData(playersSaveData)
 
@@ -400,7 +413,7 @@ class Director:
         currentPlayer = self._getCurrentPlayerFromSaveData(boardSaveData)
 
         boardBuilder.setTiles(tiles)
-        boardBuilder.setPieces([*knights, *rooks, *pawns])
+        boardBuilder.setPieces([*knights, *rooks, *pawns, *bishops])
         boardBuilder.setPlayers(players)
         boardBuilder.setCurrentPlayer(currentPlayer)
 
