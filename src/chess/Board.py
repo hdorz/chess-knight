@@ -7,6 +7,7 @@ from .Knight import Knight
 from .Pawn import Pawn
 from .Piece import Piece, TPiece
 from .Player import Player
+from .Queen import Queen
 from .Rook import Rook
 from .Tile import Tile
 
@@ -68,6 +69,9 @@ class Board(SaveLoadMixin):
     def getBishops(self) -> list[Bishop]:
         return self._getPiecesByType(Bishop)
 
+    def getQueens(self) -> list[Queen]:
+        return self._getPiecesByType(Queen)
+
     def _getPiecesByType(self, pieceClass: Type[TPiece]) -> list[TPiece]:
         return [
             piece
@@ -121,6 +125,7 @@ class Board(SaveLoadMixin):
             cfgKeys.ROOKS,
             cfgKeys.PAWNS,
             cfgKeys.BISHOPS,
+            cfgKeys.QUEENS,
             cfgKeys.PLAYERS,
             cfgKeys.BOARD,
         ]
@@ -133,12 +138,14 @@ class Board(SaveLoadMixin):
         rooks: list[Rook] = self.getRooks()
         pawns: list[Pawn] = self.getPawns()
         bishops: list[Bishop] = self.getBishops()
+        queens: list[Bishop] = self.getQueens()
 
         config.set(cfgKeys.TILES, "length", len(self.tiles))
         config.set(cfgKeys.KNIGHTS, "length", len(knights))
         config.set(cfgKeys.ROOKS, "length", len(rooks))
         config.set(cfgKeys.PAWNS, "length", len(pawns))
         config.set(cfgKeys.BISHOPS, "length", len(bishops))
+        config.set(cfgKeys.QUEENS, "length", len(queens))
         config.set(cfgKeys.PLAYERS, "length", len(self.players.values()))
         config.set(cfgKeys.BOARD, "length", 1)
 
@@ -153,6 +160,8 @@ class Board(SaveLoadMixin):
             pawns[number].save(number=number)
         for number in range(0, len(bishops)):
             bishops[number].save(number=number)
+        for number in range(0, len(queens)):
+            queens[number].save(number=number)
 
         for number in range(0, len(self.players.values())):
             [p for p in self.players.values()][number].save(number=number)

@@ -12,6 +12,7 @@ from .Knight import Knight
 from .Pawn import Pawn
 from .Piece import TPiece
 from .Player import Player
+from .Queen import Queen
 from .Rook import Rook
 from .Tile import Tile
 
@@ -275,6 +276,15 @@ class Director:
             piecesSaveData=bishopsSaveData,
         )
 
+    def _createQueensFromSaveData(
+        self, tiles: list[Tile], queensSaveData: list[dict]
+    ) -> list[Queen]:
+        return self._createPiecesFromSaveData(
+            tiles=tiles,
+            pieceClass=Queen,
+            piecesSaveData=queensSaveData,
+        )
+
     def _createPiecesFromSaveData(
         self, tiles: list[Tile], pieceClass: Type[TPiece], piecesSaveData: list[dict]
     ) -> list[TPiece]:
@@ -406,6 +416,9 @@ class Director:
         bishopsSaveData = self._loadSectionData(config, cfgKeys.BISHOPS)
         bishops = self._createBishopsFromSaveData(tiles, bishopsSaveData)
 
+        queensSaveData = self._loadSectionData(config, cfgKeys.QUEENS)
+        queens = self._createQueensFromSaveData(tiles, queensSaveData)
+
         playersSaveData = self._loadSectionData(config, cfgKeys.PLAYERS)
         players = self._createPlayersFromSaveData(playersSaveData)
 
@@ -413,7 +426,7 @@ class Director:
         currentPlayer = self._getCurrentPlayerFromSaveData(boardSaveData)
 
         boardBuilder.setTiles(tiles)
-        boardBuilder.setPieces([*knights, *rooks, *pawns, *bishops])
+        boardBuilder.setPieces([*knights, *rooks, *pawns, *bishops, *queens])
         boardBuilder.setPlayers(players)
         boardBuilder.setCurrentPlayer(currentPlayer)
 
