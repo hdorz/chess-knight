@@ -239,6 +239,12 @@ class NewScreenState(InitialiseState):
                         print(f"Number of knights: {len(s.board.getKnights())}")
                         print([str(knight) for knight in s.board.getKnights()])
 
+                        print(f"Number of rooks: {len(s.board.getRooks())}")
+                        print([str(rook) for rook in s.board.getRooks()])
+
+                        print(f"Number of pawns: {len(s.board.getPawns())}")
+                        print([str(pawn) for pawn in s.board.getPawns()])
+
                         s.currentPlayerSurface.setCurrentPlayer(
                             s.board.getCurrentPlayer().getName()
                         )

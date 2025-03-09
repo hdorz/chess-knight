@@ -135,8 +135,8 @@ class Piece(SpriteImage, SaveLoadMixin):
                 self.updatePosition(self.getSpace().getCoord())
 
                 self.claimedPieces += 1
-                self.timesMoved += 1
 
+            self.timesMoved += 1
             return True
         return False
 

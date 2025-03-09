@@ -74,5 +74,7 @@ class MovePieceTurn(Turn):
                 eventManager.post(event=Events.CHANGE_PLAYER_EVENT)
                 self.board.changeCurrentPlayer()
                 self.board.deselectPiece()
+                # save board after every successful turn, in case the game crashes
+                self.board.save()
             elif selectedSpace is not currentSpace:
                 notification.push(f"invalid space")
