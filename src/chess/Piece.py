@@ -61,9 +61,12 @@ class Piece(SpriteImage, SaveLoadMixin):
     def findAndRememberPotentialTiles(self):
         pass
 
-    @abstractmethod
     def highlightTiles(self, highlight: bool = False):
-        pass
+        for space in self.potentialSpaces:
+            if highlight:
+                space.highlight()
+            else:
+                space.stopHighlight()
 
     def setTimesMoved(self, timesMoved: int):
         self.timesMoved = timesMoved

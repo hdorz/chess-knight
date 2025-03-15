@@ -1,3 +1,5 @@
+from typing import Literal
+
 from .Piece import Piece
 from .Space import Space
 
@@ -12,7 +14,7 @@ class Knight(Piece):
         playerName: str = "defaultPlayerName",
         objectName: str = "defaultPieceName",
         space: Space | None = None,
-        team: str = "default",
+        team: Literal["black", "white"] = "default",
     ):
         Piece.__init__(
             self=self,
@@ -58,10 +60,3 @@ class Knight(Piece):
                         potentialSpaces.append(space)
 
         self.potentialSpaces = potentialSpaces
-
-    def highlightTiles(self, highlight: bool = False):
-        for space in self.potentialSpaces:
-            if highlight:
-                space.highlight()
-            else:
-                space.stopHighlight()
