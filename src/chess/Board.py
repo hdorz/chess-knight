@@ -17,12 +17,13 @@ class Board(SaveLoadMixin):
     def __init__(self, players: dict[str, Player] | None = None) -> None:
         self.tiles = None
         self.pieces = None
-        self.gameWon = False
+        self.gameWon: bool = False
         self.selectedPiece = None
         self.selectedTile = None
         self._currentPlayerIndex: int = 0
         self.currentPlayer: Player | None = None
         self.players: dict[str, Player] | None = players
+        self.checkmate: bool = False
 
     def isATileSelected(self) -> bool:
         if self.selectedTile is not None:
@@ -40,8 +41,8 @@ class Board(SaveLoadMixin):
             return True
         return False
 
-    def selectPiece(self, knight: Knight):
-        self.selectedPiece = knight
+    def selectPiece(self, piece: TPiece):
+        self.selectedPiece = piece
         self.selectedPiece.highlight()
 
     def deselectPiece(self):
@@ -57,6 +58,38 @@ class Board(SaveLoadMixin):
 
     def setPieces(self, pieces: list[Piece]):
         self.pieces = pieces
+
+    def makeAllPiecesFindPotentialTiles(self):
+        for tile in self.tiles:
+            tile.resetCanBeReachedByAPiece()
+        for piece in self._getPiecesNotThisType(King):
+            piece.findAndRememberPotentialTiles()
+        for _repeat in range(0, 2):
+            for king in self.getKings():
+                king.findAndRememberPotentialTiles()
+
+    def checkIsThereCheckMate(self):
+        # to follow after calling makeAllPiecesFindPotentialTiles()
+        # and changeCurrentPlayer()
+        kings: list[King] = self.getKings()
+        king: King = [
+            king
+            for king in kings
+            if king.getPlayerName() == self.getCurrentPlayer().getName()
+        ][0]
+        if king.getSpace().getCanBeReachedByAPiece(king.getOpponentTeam()):
+            self.checkmate = True
+            self.selectPiece(king)
+        else:
+            self.checkmate = False
+
+    def isInCheckMate(self) -> bool:
+        return self.checkmate
+
+    def hasGameFinished(self) -> bool:
+        if not self.areAnyTilesHighlighted() and self.isInCheckMate():
+            return True
+        return False
 
     def getKnights(self) -> list[Knight]:
         return self._getPiecesByType(Knight)
@@ -83,6 +116,13 @@ class Board(SaveLoadMixin):
             if type(piece).__name__ == pieceClass.__name__
         ]
 
+    def _getPiecesNotThisType(self, pieceClass: Type[TPiece]) -> list[TPiece]:
+        return [
+            piece
+            for piece in self.pieces
+            if type(piece).__name__ != pieceClass.__name__
+        ]
+
     def getTiles(self):
         return self.tiles
 
@@ -92,6 +132,12 @@ class Board(SaveLoadMixin):
     def highlightPotentialTiles(self):
         if self.isAPieceSelected():
             self.selectedPiece.highlightTiles(highlight=True)
+
+    def areAnyTilesHighlighted(self) -> bool:
+        for tile in self.tiles:
+            if tile.isHighlighted():
+                return True
+        return False
 
     def setPlayers(self, players: dict[str, Player]):
         self.players = players
@@ -103,6 +149,12 @@ class Board(SaveLoadMixin):
 
     def getCurrentPlayer(self) -> Player:
         return self.currentPlayer
+
+    def getOtherPlayer(self) -> Player:
+        players = [p for p in self.players.values()]
+        numberOfPlayers = len(players)
+        otherPlayerIndex = (self._currentPlayerIndex + 1) % numberOfPlayers
+        return players[otherPlayerIndex]
 
     def setCurrentPlayer(self, player: str) -> bool:
         if self.players is not None:

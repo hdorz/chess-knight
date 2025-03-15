@@ -198,9 +198,6 @@ class Director:
         for knight in knights:
             knight.setCoord(knight.getSpace().getCoord())
 
-        for knight in knights:
-            knight.findAndRememberPotentialTiles()
-
         return knights
 
     def _createPiecesFromConfig(
@@ -234,10 +231,6 @@ class Director:
         for piece in pieces:
             if piece.getIsOnBoard():
                 piece.setCoord(piece.getSpace().getCoord())
-
-        for piece in pieces:
-            if piece.getIsOnBoard():
-                piece.findAndRememberPotentialTiles()
 
         return pieces
 
@@ -326,23 +319,20 @@ class Director:
             if piece.getIsOnBoard():
                 piece.setCoord(piece.getSpace().getCoord())
 
-        for piece in pieces:
-            if piece.getIsOnBoard():
-                piece.findAndRememberPotentialTiles()
-
         return pieces
 
     def _createPlayers(self) -> dict[str, Player]:
         return {
-            PLAYER_1: Player(name=PLAYER_1),
-            PLAYER_2: Player(name=PLAYER_2),
+            PLAYER_1: Player(name=PLAYER_1, team="white"),
+            PLAYER_2: Player(name=PLAYER_2, team="black"),
         }
 
     def _createPlayersFromSaveData(self, playersSaveData) -> dict[str, Player]:
         playersDict = {}
         for playerConfig in playersSaveData:
             name: str = playerConfig["name"]
-            player = Player(name=name)
+            team: str = playerConfig["team"]
+            player = Player(name=name, team=team)
             points: int = playerConfig["points"]
             player.incrementPoints(points=points)
             playersDict[name] = player
@@ -444,4 +434,5 @@ class Director:
         boardBuilder.setCurrentPlayer(currentPlayer)
 
     def exportSaveFile(self, board: Board):
-        board.save()
+        # board.save()
+        pass

@@ -38,6 +38,7 @@ class Rook(Piece):
             while space is not None:
                 space = space.getAdjacentSpace(direction)
                 if space is not None:
+                    space.updateCanBeReachedByAPiece(self.getTeam())
                     if space.isOccupied():
                         otherPiece: Piece = space.getPiece()
                         if otherPiece.getTeam() != self.getTeam():
@@ -49,7 +50,6 @@ class Rook(Piece):
         self.potentialSpaces = potentialSpaces
 
     def highlightTiles(self, highlight: bool = False):
-        self.findAndRememberPotentialTiles()
         for space in self.potentialSpaces:
             if highlight:
                 space.highlight()

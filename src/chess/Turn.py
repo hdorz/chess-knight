@@ -41,8 +41,9 @@ class SelectPieceTurn(Turn):
                     notification.push(f"{piece.getObjectName()} selected")
 
         elif piece is self.board.getSelectedPiece():
-            self.board.deselectPiece()
-            notification.push(f"{piece.getObjectName()} deselected")
+            if not self.board.isInCheckMate():
+                self.board.deselectPiece()
+                notification.push(f"{piece.getObjectName()} deselected")
 
 
 class MovePieceTurn(Turn):
@@ -76,7 +77,32 @@ class MovePieceTurn(Turn):
                 eventManager.post(event=Events.CHANGE_PLAYER_EVENT)
                 self.board.changeCurrentPlayer()
                 self.board.deselectPiece()
+                self.board.makeAllPiecesFindPotentialTiles()
+                self.board.checkIsThereCheckMate()
+                if self.board.isInCheckMate():
+                    notification.push("Checkmate!")
+                    eventManager.post(event=Events.CHECKMATE_EVENT)
                 # save board after every successful turn, in case the game crashes
-                self.board.save()
+                # self.board.save()
             elif selectedSpace is not currentSpace:
                 notification.push(f"invalid space")
+
+
+class KingInCheckmateTurn(Turn):
+
+    def __init__(self, board: Board) -> None:
+        super().__init__(board)
+
+    def execute(self) -> bool:
+        if self.board.isAPieceSelected() and self.board.isInCheckMate():
+            piece = self.board.getSelectedPiece()
+            if piece.getPlayerName() == self.board.getCurrentPlayer().getName():
+                if piece.getIsOnBoard():
+                    self.board.highlightPotentialTiles()
+                    if self.board.hasGameFinished():
+                        otherPlayer = self.board.getOtherPlayer()
+                        notification.push(
+                            f"Game finished! {otherPlayer.getName()} ({otherPlayer.getTeam()}) won!"
+                        )
+                    else:
+                        notification.push(f"{piece.getObjectName()} needs to move")

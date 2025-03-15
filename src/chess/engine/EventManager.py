@@ -5,6 +5,7 @@ class Events:
     WIN_GAME_EVENT = pg.event.custom_type()
     TAKE_PIECE_EVENT = pg.event.custom_type()
     CHANGE_PLAYER_EVENT = pg.event.custom_type()
+    CHECKMATE_EVENT = pg.event.custom_type()
 
 
 class EventManagerInstance:

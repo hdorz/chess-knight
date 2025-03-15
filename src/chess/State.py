@@ -20,7 +20,7 @@ from .engine.SpriteGroup import SpriteGroup
 from .Piece import Piece
 from .Tile import Tile
 from .TriggerKey import TriggerKey
-from .Turn import MovePieceTurn, SelectPieceTurn
+from .Turn import KingInCheckmateTurn, MovePieceTurn, SelectPieceTurn
 
 
 class State(ABC):
@@ -60,6 +60,7 @@ class InitialiseState(State):
     startScreenSprites = None
     selectPieceTurn = None
     movePieceTurn = None
+    checkmateTurn = None
 
     @staticmethod
     def initialise():
@@ -163,6 +164,9 @@ class GameRunningState(InitialiseState):
                 s.currentPlayerSurface.setCurrentPlayer(
                     s.board.getCurrentPlayer().getName()
                 )
+            if event.type == Events.CHECKMATE_EVENT:
+                print("Events.CHECKMATE_EVENT")
+                s.checkmateTurn.execute()
 
         s.clock.tick(60)
         s.eventManager.listen()
@@ -236,23 +240,23 @@ class NewScreenState(InitialiseState):
                             ]
                         )
 
-                        print(f"Number of knights: {len(s.board.getKnights())}")
-                        print([str(knight) for knight in s.board.getKnights()])
+                        # print(f"Number of knights: {len(s.board.getKnights())}")
+                        # print([str(knight) for knight in s.board.getKnights()])
 
-                        print(f"Number of rooks: {len(s.board.getRooks())}")
-                        print([str(rook) for rook in s.board.getRooks()])
+                        # print(f"Number of rooks: {len(s.board.getRooks())}")
+                        # print([str(rook) for rook in s.board.getRooks()])
 
-                        print(f"Number of pawns: {len(s.board.getPawns())}")
-                        print([str(pawn) for pawn in s.board.getPawns()])
+                        # print(f"Number of pawns: {len(s.board.getPawns())}")
+                        # print([str(pawn) for pawn in s.board.getPawns()])
 
-                        print(f"Number of bishops: {len(s.board.getBishops())}")
-                        print([str(bishop) for bishop in s.board.getBishops()])
+                        # print(f"Number of bishops: {len(s.board.getBishops())}")
+                        # print([str(bishop) for bishop in s.board.getBishops()])
 
-                        print(f"Number of queens: {len(s.board.getQueens())}")
-                        print([str(queen) for queen in s.board.getQueens()])
+                        # print(f"Number of queens: {len(s.board.getQueens())}")
+                        # print([str(queen) for queen in s.board.getQueens()])
 
-                        print(f"Number of kings: {len(s.board.getKings())}")
-                        print([str(king) for king in s.board.getKings()])
+                        # print(f"Number of kings: {len(s.board.getKings())}")
+                        # print([str(king) for king in s.board.getKings()])
 
                         s.currentPlayerSurface.setCurrentPlayer(
                             s.board.getCurrentPlayer().getName()
@@ -260,6 +264,7 @@ class NewScreenState(InitialiseState):
 
                         s.selectPieceTurn = SelectPieceTurn(s.board)
                         s.movePieceTurn = MovePieceTurn(s.board)
+                        s.checkmateTurn = KingInCheckmateTurn(s.board)
 
                         if s.loadFromSave:
                             for player in s.board.getPlayers():

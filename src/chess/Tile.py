@@ -20,6 +20,9 @@ class Tile(Space):
         self.colour = fileName
         self.piece = None
 
+    def __str__(self):
+        return str(self.number)
+
     def placePiece(self, piece: Piece) -> bool:
         if not self.isOccupied() and self.piece is None:
             self.piece = piece

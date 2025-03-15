@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from typing import Literal
 
 from .engine.SpriteImage import SpriteImage
 
@@ -26,6 +27,11 @@ class Space(SpriteImage):
         self.occupied = False
         self.number = number
 
+        self.canBeReachedByAPiece: dict = {
+            "black": False,
+            "white": False,
+        }
+
     @abstractmethod
     def placePiece(self, piece) -> bool:
         pass
@@ -37,6 +43,16 @@ class Space(SpriteImage):
     @abstractmethod
     def getPiece(self):
         pass
+
+    def resetCanBeReachedByAPiece(self):
+        self.canBeReachedByAPiece["black"] = False
+        self.canBeReachedByAPiece["white"] = False
+
+    def updateCanBeReachedByAPiece(self, team: Literal["black", "white"]):
+        self.canBeReachedByAPiece[team] = True
+
+    def getCanBeReachedByAPiece(self, team: Literal["black", "white"]) -> bool:
+        return self.canBeReachedByAPiece[team]
 
     def getNumber(self) -> int:
         return self.number

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TypeVar
+from typing import Literal, TypeVar
 
 from .engine.SaveLoadMixin import SaveLoadMixin
 from .engine.SpriteImage import SpriteImage
@@ -18,7 +18,7 @@ class Piece(SpriteImage, SaveLoadMixin):
         playerName: str = "defaultPlayerName",
         objectName: str = "defaultPieceName",
         space: Space | None = None,
-        team: str = "default",
+        team: Literal["black", "white"] = "default",
     ):
         if type(self) is Piece:
             raise Exception("Piece class is an abstract class")
@@ -43,6 +43,12 @@ class Piece(SpriteImage, SaveLoadMixin):
 
         self.type: str = type(self).__name__
         self.potentialSpaces: list[Space] | None = None
+
+        self.opponentTeam = ""
+        if self.team == "black":
+            self.opponentTeam = "white"
+        elif self.team == "white":
+            self.opponentTeam = "black"
 
     def __str__(self):
         return self.objectName
@@ -72,7 +78,7 @@ class Piece(SpriteImage, SaveLoadMixin):
         return self.playerName
 
     def getObjectName(self):
-        return self.objectName
+        return f"{self.objectName} ({self.team})"
 
     def getfileName(self):
         return self.fileName
@@ -91,8 +97,11 @@ class Piece(SpriteImage, SaveLoadMixin):
             return True
         return False
 
-    def getTeam(self) -> str:
+    def getTeam(self) -> Literal["black", "white"]:
         return self.team
+
+    def getOpponentTeam(self) -> Literal["black", "white"]:
+        return self.opponentTeam
 
     def takeOffBoard(self) -> bool:
         self.isOnBoard = False

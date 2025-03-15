@@ -44,6 +44,7 @@ class StandardBoardBuilder(BoardBuilder):
 
     def setPieces(self, pieces: list[Piece]):
         self.board.setPieces(pieces)
+        self.board.makeAllPiecesFindPotentialTiles()
 
     def setPlayers(self, players: dict[str, Player]):
         self.board.setPlayers(players)
