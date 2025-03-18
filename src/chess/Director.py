@@ -434,5 +434,4 @@ class Director:
         boardBuilder.setCurrentPlayer(currentPlayer)
 
     def exportSaveFile(self, board: Board):
-        # board.save()
-        pass
+        board.save()

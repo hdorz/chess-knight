@@ -39,7 +39,7 @@ class Piece(SpriteImage, SaveLoadMixin):
         if space is not None:
             self.setSpace(space)
 
-        self.movementSpeed = 30
+        self.movementSpeed = 50
 
         self.type: str = type(self).__name__
         self.potentialSpaces: list[Space] | None = None
@@ -112,7 +112,7 @@ class Piece(SpriteImage, SaveLoadMixin):
     def update(self):
         super().update()
 
-    def move(self, newSpace: Space) -> bool:
+    def move(self, newSpace: Space, updatePosition=True) -> bool:
         if newSpace.isHighlighted():
             if not newSpace.isOccupied():
                 self.highlightTiles(highlight=False)
@@ -124,15 +124,15 @@ class Piece(SpriteImage, SaveLoadMixin):
                 self.setSpace(newSpace)
                 newSpace.placePiece(self)
 
-                self.updatePosition(self.getSpace().getCoord())
             else:
-                oldPiece: Piece = newSpace.getPiece()
+                otherPiece: Piece = newSpace.getPiece()
 
-                if oldPiece.getTeam() == self.getTeam():
+                if otherPiece.getTeam() == self.getTeam():
                     return False
 
-                oldPiece.takeOffBoard()
-                oldPiece.kill()
+                otherPiece.takeOffBoard()
+                if updatePosition:
+                    otherPiece.kill()
 
                 self.highlightTiles(highlight=False)
 
@@ -144,9 +144,10 @@ class Piece(SpriteImage, SaveLoadMixin):
                 self.setSpace(newSpace)
                 newSpace.placePiece(self)
 
-                self.updatePosition(self.getSpace().getCoord())
-
                 self.claimedPieces += 1
+
+            if updatePosition:
+                self.updatePosition(self.getSpace().getCoord())
 
             self.timesMoved += 1
             return True

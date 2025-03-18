@@ -10,6 +10,7 @@ from .Piece import Piece, TPiece
 from .Player import Player
 from .Queen import Queen
 from .Rook import Rook
+from .schemas.MoveRecord import MoveRecord
 from .Tile import Tile
 
 
@@ -24,6 +25,14 @@ class Board(SaveLoadMixin):
         self.currentPlayer: Player | None = None
         self.players: dict[str, Player] | None = players
         self.checkmate: bool = False
+        self.moveStack: list = []
+
+    def addMoveToMoveStack(self, moveDict: dict):
+        self.moveStack.append(MoveRecord(**moveDict))
+
+    def popMoveFromMoveStack(self) -> MoveRecord:
+        if self.moveStack:
+            return self.moveStack.pop(-1)
 
     def isATileSelected(self) -> bool:
         if self.selectedTile is not None:
@@ -46,15 +55,27 @@ class Board(SaveLoadMixin):
         self.selectedPiece.highlight()
 
     def deselectPiece(self):
-        self.selectedPiece.stopHighlight()
-        self.selectedPiece.highlightTiles(highlight=False)
-        self.selectedPiece = None
+        if self.selectedPiece is not None:
+            self.selectedPiece.stopHighlight()
+            self.selectedPiece.highlightTiles(highlight=False)
+            self.selectedPiece = None
 
     def getSelectedPiece(self) -> Knight:
         return self.selectedPiece
 
     def getPieces(self) -> list[Piece]:
         return self.pieces
+
+    def getPiecesOnBoard(self) -> list[Piece]:
+        return [piece for piece in self.pieces if piece.getIsOnBoard()]
+
+    def getCurrentPlayersPiecesOnBoard(self) -> list[Piece]:
+        return [
+            piece
+            for piece in self.pieces
+            if piece.getPlayerName() == self.getCurrentPlayer().getName()
+            and piece.getIsOnBoard()
+        ]
 
     def setPieces(self, pieces: list[Piece]):
         self.pieces = pieces
@@ -68,28 +89,26 @@ class Board(SaveLoadMixin):
             for king in self.getKings():
                 king.findAndRememberPotentialTiles()
 
-    def checkIsThereCheckMate(self):
-        # to follow after calling makeAllPiecesFindPotentialTiles()
-        # and changeCurrentPlayer()
+    def getCurrentPlayersKing(self) -> King:
         kings: list[King] = self.getKings()
         king: King = [
             king
             for king in kings
             if king.getPlayerName() == self.getCurrentPlayer().getName()
         ][0]
-        if king.getSpace().getCanBeReachedByAPiece(king.getOpponentTeam()):
-            self.checkmate = True
-            self.selectPiece(king)
-        else:
-            self.checkmate = False
+        return king
 
-    def isInCheckMate(self) -> bool:
+    def checkIsThereCheck(self):
+        # to follow after calling makeAllPiecesFindPotentialTiles()
+        # and changeCurrentPlayer()
+        king = self.getCurrentPlayersKing()
+        return king.getSpace().getCanBeReachedByAPiece(king.getOpponentTeam())
+
+    def isInCheck(self) -> bool:
         return self.checkmate
 
-    def hasGameFinished(self) -> bool:
-        if not self.areAnyTilesHighlighted() and self.isInCheckMate():
-            return True
-        return False
+    def setIsCheck(self, checkmate: bool):
+        self.checkmate = checkmate
 
     def getKnights(self) -> list[Knight]:
         return self._getPiecesByType(Knight)
@@ -113,14 +132,14 @@ class Board(SaveLoadMixin):
         return [
             piece
             for piece in self.pieces
-            if type(piece).__name__ == pieceClass.__name__
+            if type(piece).__name__ == pieceClass.__name__ and piece.getIsOnBoard()
         ]
 
     def _getPiecesNotThisType(self, pieceClass: Type[TPiece]) -> list[TPiece]:
         return [
             piece
             for piece in self.pieces
-            if type(piece).__name__ != pieceClass.__name__
+            if type(piece).__name__ != pieceClass.__name__ and piece.getIsOnBoard()
         ]
 
     def getTiles(self):

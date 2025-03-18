@@ -5,7 +5,11 @@ class Events:
     WIN_GAME_EVENT = pg.event.custom_type()
     TAKE_PIECE_EVENT = pg.event.custom_type()
     CHANGE_PLAYER_EVENT = pg.event.custom_type()
-    CHECKMATE_EVENT = pg.event.custom_type()
+    CHECK_EVENT = pg.event.custom_type()
+    STOP_CHECK_EVENT = pg.event.custom_type()
+    UNDO_MOVE_EVENT = pg.event.custom_type()
+    FREEZE_DISPLAY_EVENT = pg.event.custom_type()
+    STOP_FREEZE_DISPLAY_EVENT = pg.event.custom_type()
 
 
 class EventManagerInstance:

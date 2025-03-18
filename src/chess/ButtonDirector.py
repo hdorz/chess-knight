@@ -32,3 +32,9 @@ class ButtonDirector:
             loadButton.changeEnableState(enableButton=False)
 
         return [newButton, loadButton]
+
+    def createUndoButton(self):
+        undoButton = Button(TriggerKey.UNDO, scale=0.155)
+        undoButton.setCoord([1200, 0])
+
+        return [undoButton]

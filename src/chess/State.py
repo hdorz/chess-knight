@@ -20,7 +20,13 @@ from .engine.SpriteGroup import SpriteGroup
 from .Piece import Piece
 from .Tile import Tile
 from .TriggerKey import TriggerKey
-from .Turn import KingInCheckmateTurn, MovePieceTurn, SelectPieceTurn
+from .Turn import (
+    IsBoardInCheckMateTurn,
+    MovePieceCheckTurn,
+    MovePieceTurn,
+    SelectPieceTurn,
+    UndoTurn,
+)
 
 
 class State(ABC):
@@ -60,7 +66,12 @@ class InitialiseState(State):
     startScreenSprites = None
     selectPieceTurn = None
     movePieceTurn = None
-    checkmateTurn = None
+    isBoardInCheckMateTurn = None
+    movePieceCheckTurn = None
+    undoTurn = None
+    isInCheck = False
+
+    updateTheDisplay = True
 
     @staticmethod
     def initialise():
@@ -132,7 +143,8 @@ class GameRunningState(InitialiseState):
         s.display.setBackgroundSet(s.playingBackground.getSet())
         s.display.setBackground(s.playingBackground.getBackground())
         s.display.setSprites(s.gameSprites)
-        s.display.updateDisplay()
+        if s.updateTheDisplay:
+            s.display.updateDisplay()
         s.display.clear()
 
         for event in pg.event.get():
@@ -151,22 +163,58 @@ class GameRunningState(InitialiseState):
                     if isinstance(sprite, Piece):
                         s.selectPieceTurn.execute(sprite)
                     elif isinstance(sprite, Tile):
-                        s.movePieceTurn.execute(sprite)
+                        if s.isInCheck:
+                            print("movePieceCheckTurn")
+                            s.movePieceCheckTurn.execute(sprite)
+                        else:
+                            print("movePieceTurn")
+                            s.movePieceTurn.execute(sprite)
+
+            if event.type == pg.MOUSEBUTTONUP:
+                pos = pg.mouse.get_pos()
+                clickedSprites = [
+                    spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
+                ]
+                for sprite in clickedSprites:
+                    if isinstance(sprite, Button):
+                        s.undoTurn.execute()
 
             if event.type == Events.TAKE_PIECE_EVENT:
                 print("Events.TAKE_PIECE_EVENT")
-                player = event.dict.get("player")
+                playerName = event.dict.get("playerName")
                 points = event.dict.get("points")
-                s.playerSurfacesDict[player].incrementPoints(points)
+                s.playerSurfacesDict[playerName].incrementPoints(points)
                 s.display.clear()
+
             if event.type == Events.CHANGE_PLAYER_EVENT:
                 print("Events.CHANGE_PLAYER_EVENT")
                 s.currentPlayerSurface.setCurrentPlayer(
                     s.board.getCurrentPlayer().getName()
                 )
-            if event.type == Events.CHECKMATE_EVENT:
-                print("Events.CHECKMATE_EVENT")
-                s.checkmateTurn.execute()
+            if event.type == Events.CHECK_EVENT:
+                print("Events.CHECK_EVENT")
+                s.isInCheck = True
+                s.isBoardInCheckMateTurn.execute()
+                s.notification.push("Check!")
+
+            if event.type == Events.STOP_CHECK_EVENT:
+                print("Events.STOP_CHECK_EVENT")
+                s.isInCheck = False
+
+            if event.type == Events.UNDO_MOVE_EVENT:
+                print("Events.UNDO_MOVE_EVENT")
+                s.gameSprites.addSprites([event.dict.get("otherPiece")])
+                playerName = event.dict.get("playerName")
+                points: int = event.dict.get("points")
+                s.playerSurfacesDict[playerName].incrementPoints(-points)
+
+            if event.type == Events.FREEZE_DISPLAY_EVENT:
+                print("Events.FREEZE_DISPLAY_EVENT")
+                s.updateTheDisplay = False
+
+            if event.type == Events.STOP_FREEZE_DISPLAY_EVENT:
+                print("Events.STOP_FREEZE_DISPLAY_EVENT")
+                s.updateTheDisplay = True
 
         s.clock.tick(60)
         s.eventManager.listen()
@@ -233,10 +281,12 @@ class NewScreenState(InitialiseState):
                             }
 
                         s.board = s.boardBuilder.getBoard()
+
                         s.gameSprites = SpriteGroup(
                             [
                                 *s.board.getTiles(),
                                 *s.board.getPieces(),
+                                *s.buttonDirector.createUndoButton(),
                             ]
                         )
 
@@ -264,7 +314,9 @@ class NewScreenState(InitialiseState):
 
                         s.selectPieceTurn = SelectPieceTurn(s.board)
                         s.movePieceTurn = MovePieceTurn(s.board)
-                        s.checkmateTurn = KingInCheckmateTurn(s.board)
+                        s.isBoardInCheckMateTurn = IsBoardInCheckMateTurn(s.board)
+                        s.movePieceCheckTurn = MovePieceCheckTurn(s.board)
+                        s.undoTurn = UndoTurn(s.board)
 
                         if s.loadFromSave:
                             for player in s.board.getPlayers():
@@ -274,6 +326,9 @@ class NewScreenState(InitialiseState):
                             for piece in s.board.getPieces():
                                 if not piece.getIsOnBoard():
                                     piece.kill()
+                            s.board.setIsCheck(s.board.checkIsThereCheck())
+                            if s.board.isInCheck():
+                                s.eventManager.post(event=Events.CHECK_EVENT)
 
                         s.notification.push("Starting game!")
 

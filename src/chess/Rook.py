@@ -1,5 +1,6 @@
 from typing import Literal
 
+from .King import King
 from .Piece import Piece
 from .Space import Space
 
@@ -36,7 +37,6 @@ class Rook(Piece):
         potentialSpaces: list[Space] = []
         for direction in paths:
             space = self.getSpace()
-
             while space is not None:
                 space = space.getAdjacentSpace(direction)
                 if space is not None:
@@ -48,5 +48,21 @@ class Rook(Piece):
                         break
                     else:
                         potentialSpaces.append(space)
+
+        for direction in paths:
+            space = self.getSpace()
+            while space is not None:
+                space = space.getAdjacentSpace(direction)
+                if space is not None:
+                    space.updateCanBeReachedByAPiece(self.getTeam())
+                    if space.isOccupied():
+                        otherPiece: Piece = space.getPiece()
+                        if (
+                            otherPiece.getTeam() != self.getTeam()
+                            and type(otherPiece) is King
+                        ):
+                            pass
+                        else:
+                            break
 
         self.potentialSpaces = potentialSpaces

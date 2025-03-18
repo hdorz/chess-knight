@@ -52,7 +52,9 @@ class SpriteImage(pg.sprite.Sprite):
         Set coordinate of Sprite and immediately reflect that on the display.
         """
         self.updatePosition(coord)
-        self.rect.move_ip(*self.coord)
+        vec = pg.math.Vector2
+        vector = vec(self.coord) - vec(self.rect.topleft)
+        self.rect.move_ip(*vector)
 
     def getCoord(self):
         return self.coord

@@ -1,5 +1,6 @@
 from typing import Literal
 
+from .King import King
 from .Piece import Piece
 from .Space import Space
 
@@ -47,7 +48,6 @@ class Bishop(Piece):
                     if space is None:
                         break
                 if space is not None:
-                    space.updateCanBeReachedByAPiece(self.getTeam())
                     if space.isOccupied():
                         otherPiece: Piece = space.getPiece()
                         if otherPiece.getTeam() != self.getTeam():
@@ -55,5 +55,24 @@ class Bishop(Piece):
                         break
                     else:
                         potentialSpaces.append(space)
+
+        for path in paths:
+            space = self.getSpace()
+            while space is not None:
+                for direction in path:
+                    space = space.getAdjacentSpace(direction)
+                    if space is None:
+                        break
+                if space is not None:
+                    space.updateCanBeReachedByAPiece(self.getTeam())
+                    if space.isOccupied():
+                        otherPiece: Piece = space.getPiece()
+                        if (
+                            otherPiece.getTeam() != self.getTeam()
+                            and type(otherPiece) is King
+                        ):
+                            pass
+                        else:
+                            break
 
         self.potentialSpaces = potentialSpaces

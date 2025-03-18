@@ -9,3 +9,6 @@ class SpriteGroup(pg.sprite.RenderPlain):
 
     def __init__(self, sprites: list) -> None:
         super().__init__(*sprites)
+
+    def addSprites(self, sprites: list):
+        super().add(*sprites)
