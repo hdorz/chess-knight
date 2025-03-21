@@ -223,6 +223,10 @@ class Director:
                 piece.setSpace(tiles[tileNumber])
                 tiles[tileNumber].placePiece(piece)
 
+                if pConfig["class"] is Pawn:
+                    piece: Pawn = piece
+                    piece.setHomeSpace(tiles[tileNumber])
+
             pieces.append(piece)
 
         width = self._getTileSpriteWidth(len(tiles))
@@ -255,11 +259,16 @@ class Director:
     def _createPawnsFromSaveData(
         self, tiles: list[Tile], pawnsSaveData: list[dict]
     ) -> list[Pawn]:
-        return self._createPiecesFromSaveData(
+        pawns: list[Pawn] = self._createPiecesFromSaveData(
             tiles=tiles,
             pieceClass=Pawn,
             piecesSaveData=pawnsSaveData,
         )
+        for pConfig in pawnsSaveData:
+            pawn = next(p for p in pawns if p.getObjectName() == pConfig["objectName"])
+            pawn.setHomeSpace(tiles[pConfig["homeSpace"]])
+
+        return pawns
 
     def _createBishopsFromSaveData(
         self, tiles: list[Tile], bishopsSaveData: list[dict]

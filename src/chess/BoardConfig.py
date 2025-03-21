@@ -301,7 +301,7 @@ class BoardConfig:
                 "class": Pawn,
                 "fileName": "pawn_white",
                 "playerName": "Player1",
-                "objectName": "knight_53",
+                "objectName": "pawn_53",
                 "space": 53,
                 "team": "white",
                 "timesMoved": 0,

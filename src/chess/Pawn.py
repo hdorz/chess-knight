@@ -30,15 +30,8 @@ class Pawn(Piece):
 
         self._homeSpace = None
 
-    def setSpace(self, newSpace: Space) -> bool:
-        onBoard = self.getIsOnBoard()
-        # if false, then piece not placed on board yet
-        # so first placement on a space is home space
-        success = super().setSpace(newSpace=newSpace)
-        if success and not onBoard and self.timesMoved == 0:
-            self._homeSpace = self.getSpace()
-
-        return success
+    def setHomeSpace(self, homeSpace: Space) -> bool:
+        self._homeSpace = homeSpace
 
     def getPointsValue(self) -> int:
         return 1
@@ -111,3 +104,25 @@ class Pawn(Piece):
                         potentialSpaces.append(space)
 
         self.potentialSpaces = potentialSpaces
+
+    def save(self, **kwargs):
+        config = self.getParser()
+        pieceState = {
+            "fileName": self.fileName,
+            "playerName": self.playerName,
+            "objectName": self.objectName,
+            "space": (
+                self.space.getNumber()
+                if (self.space is not None and self.isOnBoard)
+                else None
+            ),
+            "team": self.team,
+            "timesMoved": self.timesMoved,
+            "claimedPieces": self.claimedPieces,
+            "isOnBoard": self.isOnBoard,
+            "homeSpace": self._homeSpace.getNumber(),
+        }
+        # config.set("knights", f"{kwargs['number']}", pieceState)
+        config.set(
+            str(type(self).__name__).lower() + "s", f"{kwargs['number']}", pieceState
+        )
