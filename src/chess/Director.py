@@ -343,6 +343,34 @@ class Director:
         currentPlayer: str = boardConfig["currentPlayer"]
         return currentPlayer
 
+    def _getMoveStackFromSaveData(
+        self,
+        movesSaveData,
+        tiles: list[Tile],
+        pieces: list[TPiece],
+    ):
+        moveRecordStack = []
+        for movesConfig in movesSaveData:
+            moveRecordStack.append(
+                {
+                    "piece": next(
+                        p for p in pieces if p.getObjectName() == movesConfig["piece"]
+                    ),
+                    "otherPiece": (
+                        next(
+                            p
+                            for p in pieces
+                            if p.getObjectName() == movesConfig["otherPiece"]
+                        )
+                        if movesConfig["otherPiece"] is not None
+                        else None
+                    ),
+                    "oldSpace": tiles[movesConfig["oldSpace"]],
+                    "newSpace": tiles[movesConfig["newSpace"]],
+                }
+            )
+        return moveRecordStack
+
     def createStandardBoard(self, boardBuilder: BoardBuilder):
         # self._createNewStandardBoardWithKnightsOnly(boardBuilder=boardBuilder)
         self._createNewStandardBoardFromConfig(boardBuilder=boardBuilder)
@@ -428,10 +456,16 @@ class Director:
         boardSaveData = self._loadSectionData(config, cfgKeys.BOARD)
         currentPlayer = self._getCurrentPlayerFromSaveData(boardSaveData)
 
+        pieces = [*knights, *rooks, *pawns, *bishops, *queens, *kings]
+
+        movesSaveData = self._loadSectionData(config, cfgKeys.MOVES)
+        moveStack = self._getMoveStackFromSaveData(movesSaveData, tiles, pieces)
+
         boardBuilder.setTiles(tiles)
-        boardBuilder.setPieces([*knights, *rooks, *pawns, *bishops, *queens, *kings])
+        boardBuilder.setPieces(pieces)
         boardBuilder.setPlayers(players)
         boardBuilder.setCurrentPlayer(currentPlayer)
+        boardBuilder.setMoveStack(moveStack)
 
     def exportSaveFile(self, board: Board):
         board.save()

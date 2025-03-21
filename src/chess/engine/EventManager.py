@@ -8,6 +8,7 @@ class Events:
     CHECK_EVENT = pg.event.custom_type()
     STOP_CHECK_EVENT = pg.event.custom_type()
     UNDO_MOVE_EVENT = pg.event.custom_type()
+    UNDO_MOVE_REPLACE_SPRITE_EVENT = pg.event.custom_type()
     FREEZE_DISPLAY_EVENT = pg.event.custom_type()
     STOP_FREEZE_DISPLAY_EVENT = pg.event.custom_type()
 

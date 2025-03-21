@@ -27,6 +27,10 @@ class Board(SaveLoadMixin):
         self.checkmate: bool = False
         self.moveStack: list = []
 
+    def setMoveStack(self, moveStack: list[dict]):
+        for index in range(0, len(moveStack)):
+            self.moveStack.append(MoveRecord(**moveStack[index]))
+
     def addMoveToMoveStack(self, moveDict: dict):
         self.moveStack.append(MoveRecord(**moveDict))
 
@@ -83,7 +87,8 @@ class Board(SaveLoadMixin):
     def makeAllPiecesFindPotentialTiles(self):
         for tile in self.tiles:
             tile.resetCanBeReachedByAPiece()
-        for piece in self._getPiecesNotThisType(King):
+        piecesOnBoard = self.filterForPiecesOnBoard(self._getPiecesNotThisType(King))
+        for piece in piecesOnBoard:
             piece.findAndRememberPotentialTiles()
         for _repeat in range(0, 2):
             for king in self.getKings():
@@ -128,18 +133,21 @@ class Board(SaveLoadMixin):
     def getKings(self) -> list[King]:
         return self._getPiecesByType(King)
 
+    def filterForPiecesOnBoard(self, pieces: list[TPiece]):
+        return [piece for piece in pieces if piece.getIsOnBoard()]
+
     def _getPiecesByType(self, pieceClass: Type[TPiece]) -> list[TPiece]:
         return [
             piece
             for piece in self.pieces
-            if type(piece).__name__ == pieceClass.__name__ and piece.getIsOnBoard()
+            if type(piece).__name__ == pieceClass.__name__
         ]
 
     def _getPiecesNotThisType(self, pieceClass: Type[TPiece]) -> list[TPiece]:
         return [
             piece
             for piece in self.pieces
-            if type(piece).__name__ != pieceClass.__name__ and piece.getIsOnBoard()
+            if type(piece).__name__ != pieceClass.__name__
         ]
 
     def getTiles(self):
@@ -204,6 +212,7 @@ class Board(SaveLoadMixin):
             cfgKeys.KINGS,
             cfgKeys.PLAYERS,
             cfgKeys.BOARD,
+            cfgKeys.MOVES,
         ]
         for section in sections:
             if config.has_section(section):
@@ -226,6 +235,7 @@ class Board(SaveLoadMixin):
         config.set(cfgKeys.KINGS, "length", len(kings))
         config.set(cfgKeys.PLAYERS, "length", len(self.players.values()))
         config.set(cfgKeys.BOARD, "length", 1)
+        config.set(cfgKeys.MOVES, "length", len(self.moveStack))
 
         boardState = {"currentPlayer": str(self.getCurrentPlayer().getName())}
         config.set(cfgKeys.BOARD, "0", boardState)
@@ -245,6 +255,20 @@ class Board(SaveLoadMixin):
 
         for number in range(0, len(self.players.values())):
             [p for p in self.players.values()][number].save(number=number)
+
+        for number in range(0, len(self.moveStack)):
+            move: MoveRecord = self.moveStack[number]
+            moveRecordState = {
+                "piece": move.piece.getObjectName(),
+                "otherPiece": (
+                    move.otherPiece.getObjectName()
+                    if move.otherPiece is not None
+                    else None
+                ),
+                "oldSpace": move.oldSpace.getNumber(),
+                "newSpace": move.newSpace.getNumber(),
+            }
+            config.set(cfgKeys.MOVES, f"{number}", moveRecordState)
 
         with open("save.cfg", "w") as configFile:
             config.write(configFile)

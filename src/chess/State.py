@@ -201,12 +201,15 @@ class GameRunningState(InitialiseState):
                 print("Events.STOP_CHECK_EVENT")
                 s.isInCheck = False
 
-            if event.type == Events.UNDO_MOVE_EVENT:
-                print("Events.UNDO_MOVE_EVENT")
+            if event.type == Events.UNDO_MOVE_REPLACE_SPRITE_EVENT:
+                print("Events.UNDO_MOVE_REPLACE_SPRITE_EVENT")
                 s.gameSprites.addSprites([event.dict.get("otherPiece")])
                 playerName = event.dict.get("playerName")
                 points: int = event.dict.get("points")
                 s.playerSurfacesDict[playerName].incrementPoints(-points)
+
+            if event.type == Events.UNDO_MOVE_EVENT:
+                print("Events.UNDO_MOVE_EVENT")
 
             if event.type == Events.FREEZE_DISPLAY_EVENT:
                 print("Events.FREEZE_DISPLAY_EVENT")

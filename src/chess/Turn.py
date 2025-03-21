@@ -37,11 +37,11 @@ class SelectPieceTurn(Turn):
                 if piece.getIsOnBoard():
                     self.board.selectPiece(piece)
                     self.board.highlightPotentialTiles()
-                    notification.push(f"{piece.getObjectName()} selected")
+                    notification.push(f"{piece.getObjectNameAndTeam()} selected")
 
         elif piece is self.board.getSelectedPiece():
             self.board.deselectPiece()
-            notification.push(f"{piece.getObjectName()} deselected")
+            notification.push(f"{piece.getObjectNameAndTeam()} deselected")
 
 
 class MovePieceTurn(Turn):
@@ -66,7 +66,7 @@ class MovePieceTurn(Turn):
                 )
                 if otherPiece is not None:
                     notification.push(
-                        f"{otherPiece.getObjectName()} was defeated by {piece.getObjectName()}"
+                        f"{otherPiece.getObjectNameAndTeam()} was defeated by {piece.getObjectNameAndTeam()}"
                     )
                     self.board.getCurrentPlayer().incrementPoints(
                         otherPiece.getPointsValue()
@@ -219,9 +219,8 @@ class MovePieceCheckTurn(Turn):
                 else:
                     if otherPiece is not None:
                         otherPiece.kill()
-                        piece.setCoord(piece.getSpace().getCoord())
                         notification.push(
-                            f"{otherPiece.getObjectName()} was defeated by {piece.getObjectName()}"
+                            f"{otherPiece.getObjectNameAndTeam()} was defeated by {piece.getObjectNameAndTeam()}"
                         )
                         self.board.getCurrentPlayer().incrementPoints(
                             otherPiece.getPointsValue()
@@ -235,6 +234,7 @@ class MovePieceCheckTurn(Turn):
                         )
                     else:
                         notification.push("successfully moved")
+                    piece.updatePosition(piece.getSpace().getCoord())
                     eventManager.post(event=Events.STOP_CHECK_EVENT)
                     eventManager.post(event=Events.CHANGE_PLAYER_EVENT)
                     self.board.changeCurrentPlayer()
@@ -266,14 +266,18 @@ class UndoTurn(Turn):
                 lastMove.otherPiece.move(lastMove.newSpace, updatePosition=False)
                 lastMove.otherPiece.setCoord(lastMove.newSpace.getCoord())
                 lastMove.newSpace.stopHighlight()
+                self.board.getOtherPlayer().decreasePoints(
+                    lastMove.otherPiece.getPointsValue()
+                )
                 eventManager.post(
-                    event=Events.UNDO_MOVE_EVENT,
+                    event=Events.UNDO_MOVE_REPLACE_SPRITE_EVENT,
                     data={
                         "otherPiece": lastMove.otherPiece,
                         "playerName": lastMove.piece.getPlayerName(),
                         "points": lastMove.otherPiece.getPointsValue(),
                     },
                 )
+            eventManager.post(event=Events.UNDO_MOVE_EVENT)
             return True
         return False
 

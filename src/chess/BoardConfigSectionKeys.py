@@ -8,3 +8,4 @@ class BoardConfigSectionKeys:
     KINGS = "kings"
     PLAYERS = "players"
     BOARD = "board"
+    MOVES = "moves"

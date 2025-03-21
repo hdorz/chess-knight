@@ -31,6 +31,10 @@ class BoardBuilder(ABC):
     def setCurrentPlayer(self, player: str):
         pass
 
+    @abstractmethod
+    def setMoveStack(self, moveStack: list[dict]):
+        pass
+
 
 class StandardBoardBuilder(BoardBuilder):
 
@@ -53,6 +57,9 @@ class StandardBoardBuilder(BoardBuilder):
         success = self.board.setCurrentPlayer(player)
         if not success:
             raise KeyError("Player doesn't exist")
+
+    def setMoveStack(self, moveStack: list[dict]):
+        self.board.setMoveStack(moveStack)
 
     def reset(self):
         self.board = Board()

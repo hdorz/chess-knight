@@ -81,6 +81,9 @@ class Piece(SpriteImage, SaveLoadMixin):
         return self.playerName
 
     def getObjectName(self):
+        return f"{self.objectName}"
+
+    def getObjectNameAndTeam(self):
         return f"{self.objectName} ({self.team})"
 
     def getfileName(self):
@@ -108,6 +111,7 @@ class Piece(SpriteImage, SaveLoadMixin):
 
     def takeOffBoard(self) -> bool:
         self.isOnBoard = False
+        self.space = None
 
     def update(self):
         super().update()
@@ -115,10 +119,11 @@ class Piece(SpriteImage, SaveLoadMixin):
     def move(self, newSpace: Space, updatePosition=True) -> bool:
         if newSpace.isHighlighted():
             if not newSpace.isOccupied():
-                self.highlightTiles(highlight=False)
+                if self.getIsOnBoard():
+                    self.highlightTiles(highlight=False)
 
-                # remove piece from space
-                self.getSpace().removePiece()
+                    # remove piece from space
+                    self.getSpace().removePiece()
 
                 # place piece on new space
                 self.setSpace(newSpace)
@@ -134,11 +139,12 @@ class Piece(SpriteImage, SaveLoadMixin):
                 if updatePosition:
                     otherPiece.kill()
 
-                self.highlightTiles(highlight=False)
+                if self.getIsOnBoard():
+                    self.highlightTiles(highlight=False)
 
-                # remove pieces from spaces
-                newSpace.removePiece()
-                self.getSpace().removePiece()
+                    # remove pieces from spaces
+                    newSpace.removePiece()
+                    self.getSpace().removePiece()
 
                 # place piece on new space
                 self.setSpace(newSpace)

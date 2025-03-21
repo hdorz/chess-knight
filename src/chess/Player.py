@@ -1,5 +1,6 @@
 from typing import Literal
 
+from .BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
 from .engine.SaveLoadMixin import SaveLoadMixin
 
 
@@ -17,6 +18,9 @@ class Player(SaveLoadMixin):
     def incrementPoints(self, points: int):
         self.points += points
 
+    def decreasePoints(self, points: int):
+        self.points -= points
+
     def getPoints(self) -> int:
         return self.points
 
@@ -33,4 +37,4 @@ class Player(SaveLoadMixin):
             "team": self.team,
             "points": self.points,
         }
-        config.set("players", f"{kwargs['number']}", playerState)
+        config.set(cfgKeys.PLAYERS, f"{kwargs['number']}", playerState)
