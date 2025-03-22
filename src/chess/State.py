@@ -391,7 +391,7 @@ class SelectModeScreenState(InitialiseState):
 
                         # New knights only game
                         if sprite.getFileName() == TriggerKey.ALL_KNIGHTS:
-                            s.notification.push("Creating new standard game...")
+                            s.notification.push("Creating new knights only game...")
                             s.director.createNewStandardBoardWithKnightsOnly(
                                 s.boardBuilder
                             )
@@ -399,7 +399,7 @@ class SelectModeScreenState(InitialiseState):
 
                         # New standard game
                         elif sprite.getFileName() == TriggerKey.STANDARD:
-                            s.notification.push("Creating new knights only game...")
+                            s.notification.push("Creating new standard game...")
                             s.director.createNewStandardBoardFromConfig(s.boardBuilder)
                             s.boardCreated = True
 
