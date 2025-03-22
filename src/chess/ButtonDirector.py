@@ -1,8 +1,8 @@
 import os.path
 
 from .Button import Button
-from .engine.constants import windowSize
-from .TriggerKey import TriggerKey
+from .constants.constants import windowSize
+from .constants.TriggerKey import TriggerKey
 
 windowCentre = (windowSize[0] * 0.5, windowSize[1] * 0.5)
 

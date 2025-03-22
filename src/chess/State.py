@@ -5,13 +5,14 @@ import pygame as pg
 from .BoardBuilder import StandardBoardBuilder
 from .Button import Button
 from .ButtonDirector import ButtonDirector
+from .constants.constants import windowSize
+from .constants.TriggerKey import TriggerKey
 from .Director import Director
 from .engine.BackgroundSet import (
     GameBackground,
     SelectModeBackground,
     StartingBackground,
 )
-from .engine.constants import windowSize
 from .engine.CurrentPlayerSurface import (
     CurrentPlayerSurfaceInstance,
     PlayerOnePointsInstance,
@@ -23,7 +24,6 @@ from .engine.Notification import NotificationInstance
 from .engine.SpriteGroup import SpriteGroup
 from .Piece import Piece
 from .Tile import Tile
-from .TriggerKey import TriggerKey
 from .Turn import (
     IsBoardInCheckMateTurn,
     MovePieceCheckTurn,

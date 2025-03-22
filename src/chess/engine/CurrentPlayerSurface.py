@@ -1,4 +1,4 @@
-from .constants import PLAYER_1, PLAYER_2, blackFontColour, windowSize
+from ..constants.constants import PLAYER_1, PLAYER_2, blackFontColour, windowSize
 from .utilities import load_image, resource_path
 
 currentPlayerBackgroundScale = (windowSize[1] + 150) / 1280

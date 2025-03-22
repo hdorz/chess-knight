@@ -1,6 +1,6 @@
 from typing import Literal
 
-from .BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
+from .constants.BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
 from .engine.SaveLoadMixin import SaveLoadMixin
 
 

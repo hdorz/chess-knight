@@ -1,7 +1,7 @@
 from typing import Type
 
 from .Bishop import Bishop
-from .BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
+from .constants.BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
 from .engine.SaveLoadMixin import SaveLoadMixin
 from .King import King
 from .Knight import Knight

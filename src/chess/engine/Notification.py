@@ -1,6 +1,6 @@
 import pygame as pg
 
-from .constants import blackFontColour, windowSize
+from ..constants.constants import blackFontColour, windowSize
 from .utilities import load_image, resource_path
 
 notificationTextCoord = (windowSize[0] * 0.02, windowSize[1] * 0.93)

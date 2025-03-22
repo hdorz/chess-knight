@@ -6,8 +6,8 @@ from .Bishop import Bishop
 from .Board import Board
 from .BoardBuilder import BoardBuilder
 from .BoardConfig import BoardConfig
-from .BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
-from .engine.constants import PLAYER_1, PLAYER_2, windowSize
+from .constants.BoardConfigSectionKeys import BoardConfigSectionKeys as cfgKeys
+from .constants.constants import PLAYER_1, PLAYER_2, windowSize
 from .King import King
 from .Knight import Knight
 from .Pawn import Pawn
