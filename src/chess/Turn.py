@@ -49,12 +49,27 @@ class MovePieceTurn(Turn):
     def __init__(self, board: Board) -> None:
         super().__init__(board)
 
+    def _undoMove(self):
+        lastMove = self.board.popMoveFromMoveStack()
+        if lastMove is not None:
+            lastMove.oldSpace.highlight()
+            lastMove.piece.move(lastMove.oldSpace, updatePosition=False)
+            lastMove.piece.setCoord(lastMove.oldSpace.getCoord())
+            lastMove.oldSpace.stopHighlight()
+            if lastMove.otherPiece is not None:
+                lastMove.newSpace.highlight()
+                lastMove.otherPiece.move(lastMove.newSpace, updatePosition=False)
+                lastMove.otherPiece.setCoord(lastMove.newSpace.getCoord())
+                lastMove.newSpace.stopHighlight()
+        else:
+            raise Exception("MovePieceTurn _undoMove: no move was found")
+
     def execute(self, selectedSpace: Space) -> bool:
         if self.board.isAPieceSelected():
             piece: Piece = self.board.getSelectedPiece()
             currentSpace = piece.getSpace()
             otherPiece: Piece = selectedSpace.getPiece()
-            successful_move = piece.move(selectedSpace)
+            successful_move = piece.move(selectedSpace, updatePosition=False)
             if successful_move:
                 self.board.addMoveToMoveStack(
                     {
@@ -64,31 +79,40 @@ class MovePieceTurn(Turn):
                         "newSpace": selectedSpace,
                     }
                 )
-                if otherPiece is not None:
-                    notification.push(
-                        f"{otherPiece.getObjectNameAndTeam()} was defeated by {piece.getObjectNameAndTeam()}"
-                    )
-                    self.board.getCurrentPlayer().incrementPoints(
-                        otherPiece.getPointsValue()
-                    )
-                    eventManager.post(
-                        event=Events.TAKE_PIECE_EVENT,
-                        data={
-                            "playerName": piece.getPlayerName(),
-                            "points": otherPiece.getPointsValue(),
-                        },
-                    )
-                else:
-                    notification.push("successfully moved")
-                eventManager.post(event=Events.CHANGE_PLAYER_EVENT)
-                self.board.changeCurrentPlayer()
-                self.board.deselectPiece()
                 self.board.makeAllPiecesFindPotentialTiles()
-                self.board.setIsCheck(self.board.checkIsThereCheck())
-                if self.board.isInCheck():
-                    eventManager.post(event=Events.CHECK_EVENT)
-                # save board after every successful turn, in case the game crashes
-                # self.board.save()
+                if self.board.checkIsThereCheck():
+                    self._undoMove()
+                    self.board.makeAllPiecesFindPotentialTiles()
+                    self.board.highlightPotentialTiles()
+                    notification.push("cannot move, will put King in check")
+                else:
+                    piece.updatePosition(piece.getSpace().getCoord())
+                    if otherPiece is not None:
+                        otherPiece.kill()
+                        notification.push(
+                            f"{otherPiece.getObjectNameAndTeam()} was defeated by {piece.getObjectNameAndTeam()}"
+                        )
+                        self.board.getCurrentPlayer().incrementPoints(
+                            otherPiece.getPointsValue()
+                        )
+                        eventManager.post(
+                            event=Events.TAKE_PIECE_EVENT,
+                            data={
+                                "playerName": piece.getPlayerName(),
+                                "points": otherPiece.getPointsValue(),
+                            },
+                        )
+                    else:
+                        notification.push("successfully moved")
+                    eventManager.post(event=Events.CHANGE_PLAYER_EVENT)
+                    self.board.changeCurrentPlayer()
+                    self.board.deselectPiece()
+                    self.board.makeAllPiecesFindPotentialTiles()
+                    self.board.setIsCheck(self.board.checkIsThereCheck())
+                    if self.board.isInCheck():
+                        eventManager.post(event=Events.CHECK_EVENT)
+                    # save board after every successful turn, in case the game crashes
+                    self.board.save()
             elif selectedSpace is not currentSpace:
                 notification.push(f"invalid space")
 
@@ -244,7 +268,7 @@ class MovePieceCheckTurn(Turn):
                     if self.board.isInCheck():
                         eventManager.post(event=Events.CHECK_EVENT)
                     # save board after every successful turn, in case the game crashes
-                    # self.board.save()
+                    self.board.save()
             elif selectedSpace is not currentSpace:
                 notification.push(f"invalid space")
 
@@ -295,6 +319,8 @@ class UndoTurn(Turn):
                     eventManager.post(event=Events.CHECK_EVENT)
                 else:
                     eventManager.post(event=Events.STOP_CHECK_EVENT)
+                # save board after every successful turn, in case the game crashes
+                self.board.save()
             else:
                 notification.push("cannot undo, no move left to undo")
         else:
