@@ -24,6 +24,23 @@ class NotificationInstance:
         return NotificationInstance.obj
 
 
+class NotificationHolder:
+    """
+    Notification holder class returns its message once time elapsed is greater
+    than the assigned delay.
+    """
+
+    def __init__(self, msg: str, persist: int = 1000):
+        self.msg = msg
+        self.persist = persist  # milliseconds
+
+    def getMessage(self):
+        return self.msg
+
+    def getPersistTime(self):
+        return self.persist
+
+
 class Notification:
     """
     Notification class handles the appearance of notifications whenever they are pushed.
@@ -81,29 +98,29 @@ class Notification:
             scale=notificationBackgroundScale,
         )
 
-    def push(self, message):
-        self.messageQueue.append(message)
+    def push(self, message: str, persist: int = 1000):
+        self.messageQueue.append(NotificationHolder(msg=message, persist=persist))
 
     def _renderMessage(self, message):
         self.textSurface = self.font.render(message, False, blackFontColour)
 
-    def _fadeOutText(self):
+    def _fadeOutText(self, persist: int):
         """
         Start fading notification once message lands in queue
         """
         currentTime = pg.time.get_ticks()
-        if currentTime - self.lastMessageTime >= self.msgPersistTime:
+        if currentTime - self.lastMessageTime >= persist:
             self.textAlpha -= self.fadeOutSpeed
         self.textSurface.set_alpha(self.textAlpha)
         if self.textAlpha <= 0:
             self.message = ""
 
-    def _fadeOutBackground(self):
+    def _fadeOutBackground(self, persist: int):
         """
         Start fading background when no messages left in queue.
         """
         currentTime = pg.time.get_ticks()
-        if currentTime - self.lastMessageTime >= self.msgPersistTime:
+        if currentTime - self.lastMessageTime >= persist:
             self.backgroundAlpha -= self.fadeOutSpeed
         self.backgroundSurface.set_alpha(self.backgroundAlpha)
 
@@ -112,7 +129,9 @@ class Notification:
         Start rendering messages when messageQueue fills up with messages.
         """
         if (not self.message) and self.messageQueue:
-            self.message = self.messageQueue.pop(0)
+            msgHolder: NotificationHolder = self.messageQueue.pop(0)
+            self.message = msgHolder.getMessage()
+            self.msgPersistTime = msgHolder.getPersistTime()
             self.backgroundAlpha = 255
             self.backgroundSurface.set_alpha(self.backgroundAlpha)
             self.textAlpha = 255
@@ -124,9 +143,9 @@ class Notification:
             )
 
         if self.message:
-            self._fadeOutText()
+            self._fadeOutText(self.msgPersistTime)
         if not self.messageQueue:
-            self._fadeOutBackground()
+            self._fadeOutBackground(self.msgPersistTime)
 
         return (self.textSurface, self.textCoord), (
             self.backgroundSurface,
