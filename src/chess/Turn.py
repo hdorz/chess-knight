@@ -191,7 +191,8 @@ class IsBoardInCheckMateTurn(Turn):
                 if isCheckmate:
                     otherPlayer = self.board.getOtherPlayer()
                     notification.push(
-                        f"Game finished! {otherPlayer.getName()} ({otherPlayer.getTeam()}) won!"
+                        message=f"Game finished! {otherPlayer.getName()} ({otherPlayer.getTeam()}) won!",
+                        persist=5000,
                     )
 
 
