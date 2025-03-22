@@ -4,9 +4,9 @@ This is an offshoot of a previous uni assignment - a (very crude) chess game but
 
 (More pieces to be considered?)
 
-![header image](./header.png)
-![screenshot of a knights only game in early stages of play](./screenshot-1.png)
-![screenshot of a standard game in later stages of play](./screenshot-2.png)
+![header image](./screenshots/header.png)
+![screenshot of a knights only game in early stages of play](./screenshots/screenshot-1.png)
+![screenshot of a standard game in later stages of play](./screenshots/screenshot-2.png)
 
 ## Quick Setup (on Windows-based machine)
 
