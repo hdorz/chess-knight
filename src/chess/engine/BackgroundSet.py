@@ -6,6 +6,7 @@ from .CurrentPlayerSurface import (
     PlayerTwoPointsInstance,
 )
 from .Notification import NotificationInstance
+from .utilities import load_image
 
 
 class BackgroundSet(ABC):
@@ -86,12 +87,55 @@ class StartingBackground(BackgroundSet):
 
     def __init__(self, background):
         super().__init__(background=background)
+        self.header = None
+        self.setHeader()
         self.update()
 
-    def update(self):
+    def setHeader(self):
+        self.header, _ = load_image(
+            "menu/KnightChess.png",
+            colorkey=-1,
+            scale=1,
+        )
+        self.header = self.header.convert()
 
+    def update(self):
         self.backgroundSet = [
             (self.background, (0, 0)),
+            (self.header, (100, 100)),
+        ]
+
+    def getBackground(self):
+        return self.background
+
+    def getSet(self):
+        self.update()
+        return self.backgroundSet
+
+
+class SelectModeBackground(BackgroundSet):
+    """
+    StartingBackground displays the surfaces for start menu.
+    """
+
+    def __init__(self, background):
+        super().__init__(background=background)
+        self.header = None
+        self.setHeader()
+        self.update()
+
+    def setHeader(self):
+        self.header, _ = load_image(
+            "menu/WhichMode.png",
+            colorkey=-1,
+            scale=0.7,
+        )
+        self.header = self.header.convert()
+
+    def update(self):
+        self.backgroundSet = [
+            (self.background, (0, 0)),
+            (self.header, (300, 100)),
         ]
 
     def getBackground(self):

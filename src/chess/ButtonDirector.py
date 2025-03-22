@@ -38,3 +38,28 @@ class ButtonDirector:
         undoButton.setCoord([1200, 0])
 
         return [undoButton]
+
+    def createBackButton(self):
+        backButton = Button(TriggerKey.BACK, scale=0.155)
+        backButton.setCoord([1200, 870])
+
+        return [backButton]
+
+    def createSelectModeButtons(self):
+        newButton = Button(TriggerKey.ALL_KNIGHTS)
+        newButton.setCoord(
+            [
+                windowCentre[0] - newButton.getWidth(),
+                windowCentre[1] - newButton.getHeight(),
+            ]
+        )
+
+        loadButton = Button(TriggerKey.STANDARD)
+        loadButton.setCoord(
+            [
+                windowCentre[0],
+                windowCentre[1] - newButton.getHeight(),
+            ]
+        )
+
+        return [newButton, loadButton]

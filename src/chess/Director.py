@@ -164,41 +164,67 @@ class Director:
         return tiles
 
     def _createKnights(self, tiles: list[Tile]) -> list[Knight]:
-        knights = []
+        pieces = []
 
         sideLength = int(sqrt(len(tiles)))
 
         for i in range(0, sideLength * 2):
-            knight = Knight(
-                playerName=PLAYER_2,
-                fileName="knight_black",
-                team="black",
-                objectName=f"knight_{i}",
-            )
-            knights.append(knight)
+            if i == 0:
+                king = King(
+                    playerName=PLAYER_2,
+                    fileName="king_black",
+                    team="black",
+                    objectName=f"king_{i}",
+                )
+                king.setSpace(tiles[i])
+                king.getSpace().placePiece(king)
 
-            knight.setSpace(tiles[i])
-            knight.getSpace().placePiece(knight)
+                pieces.append(king)
+
+            else:
+                knight = Knight(
+                    playerName=PLAYER_2,
+                    fileName="knight_black",
+                    team="black",
+                    objectName=f"knight_{i}",
+                )
+                knight.setSpace(tiles[i])
+                knight.getSpace().placePiece(knight)
+
+                pieces.append(knight)
 
         for i in range(len(tiles) - 1, len(tiles) - sideLength * 2 - 1, -1):
-            knight = Knight(
-                playerName=PLAYER_1,
-                fileName="knight_white",
-                team="white",
-                objectName=f"knight_{i}",
-            )
-            knight.setSpace(tiles[i])
-            tiles[i].placePiece(knight)
+            if i == len(tiles) - 1:
+                king = King(
+                    playerName=PLAYER_1,
+                    fileName="king_white",
+                    team="white",
+                    objectName=f"king_{i}",
+                )
+                king.setSpace(tiles[i])
+                king.getSpace().placePiece(king)
 
-            knights.append(knight)
+                pieces.append(king)
+
+            else:
+                knight = Knight(
+                    playerName=PLAYER_1,
+                    fileName="knight_white",
+                    team="white",
+                    objectName=f"knight_{i}",
+                )
+                knight.setSpace(tiles[i])
+                knight.getSpace().placePiece(knight)
+
+                pieces.append(knight)
 
         width = self._getTileSpriteWidth(len(tiles))
-        self._resizeSprites(knights, width)
+        self._resizeSprites(pieces, width)
 
-        for knight in knights:
-            knight.setCoord(knight.getSpace().getCoord())
+        for piece in pieces:
+            piece.setCoord(piece.getSpace().getCoord())
 
-        return knights
+        return pieces
 
     def _createPiecesFromConfig(
         self, tiles: list[Tile], pieceConfigs: list[dict]
@@ -381,15 +407,16 @@ class Director:
         return moveRecordStack
 
     def createStandardBoard(self, boardBuilder: BoardBuilder):
-        # self._createNewStandardBoardWithKnightsOnly(boardBuilder=boardBuilder)
-        self._createNewStandardBoardFromConfig(boardBuilder=boardBuilder)
+        # self.createNewStandardBoardWithKnightsOnly(boardBuilder=boardBuilder)
+        # self.createNewStandardBoardFromConfig(boardBuilder=boardBuilder)
+        pass
 
-    def _createNewStandardBoardWithKnightsOnly(self, boardBuilder: BoardBuilder):
+    def createNewStandardBoardWithKnightsOnly(self, boardBuilder: BoardBuilder):
         """
         Create a standard configuration for the board with knights only.
         """
-        print("_createNewStandardBoardWithKnightsOnly")
-        tiles = self._createTiles(64)
+        print("createNewStandardBoardWithKnightsOnly")
+        tiles = self._createTiles(100)
         self._linkTiles(tiles)
         self._setTileCoords(tiles)
 
@@ -401,11 +428,11 @@ class Director:
         boardBuilder.setPieces(knights)
         boardBuilder.setPlayers(players)
 
-    def _createNewStandardBoardFromConfig(self, boardBuilder: BoardBuilder):
+    def createNewStandardBoardFromConfig(self, boardBuilder: BoardBuilder):
         """
         Create a standard configuration for the board.
         """
-        print("_createNewStandardBoardFromConfig")
+        print("createNewStandardBoardFromConfig")
         tiles = self._createTiles(64)
         self._linkTiles(tiles)
         self._setTileCoords(tiles)

@@ -40,8 +40,17 @@ class SpriteImage(pg.sprite.Sprite):
             )
         except:
             self.highlighted_image = self.image
+
+        try:
+            self.pressdown_image, _ = load_image(
+                f"{fileName}-pressdown.png", relativeDir, colorkey, scale
+            )
+        except:
+            self.pressdown_image = self.image
+
         self.original_image = self.image
         self._highlighted = False
+        self._pressedDown = False
         self.coord = None
         self.setCoord(coord)
 
@@ -97,6 +106,15 @@ class SpriteImage(pg.sprite.Sprite):
     def stopHighlight(self):
         self._highlighted = False
 
+    def isPressedDown(self):
+        return self._pressedDown
+
+    def pressDown(self):
+        self._pressedDown = True
+
+    def stopPressDown(self):
+        self._pressedDown = False
+
     def update(self):
         pos = pg.mouse.get_pos()
         hit = self.rect.collidepoint(pos)
@@ -108,5 +126,8 @@ class SpriteImage(pg.sprite.Sprite):
             self.image = pg.transform.scale(self.highlighted_image, size)
         else:
             self.image = pg.transform.scale(self.original_image, size)
+
+        if self.isPressedDown():
+            self.image = pg.transform.scale(self.pressdown_image, size)
 
         self.animate()

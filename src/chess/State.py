@@ -6,7 +6,11 @@ from .BoardBuilder import StandardBoardBuilder
 from .Button import Button
 from .ButtonDirector import ButtonDirector
 from .Director import Director
-from .engine.BackgroundSet import GameBackground, StartingBackground
+from .engine.BackgroundSet import (
+    GameBackground,
+    SelectModeBackground,
+    StartingBackground,
+)
 from .engine.constants import windowSize
 from .engine.CurrentPlayerSurface import (
     CurrentPlayerSurfaceInstance,
@@ -60,16 +64,18 @@ class InitialiseState(State):
     display = None
     playingBackground = None
     startScreenBackground = None
-    loadFromSave = None
+    selectModeBackground = None
     board = None
     gameSprites = None
     startScreenSprites = None
+    selectModeSprites = None
     selectPieceTurn = None
     movePieceTurn = None
     isBoardInCheckMateTurn = None
     movePieceCheckTurn = None
     undoTurn = None
     isInCheck = False
+    boardCreated = False
 
     updateTheDisplay = True
 
@@ -115,6 +121,7 @@ class InitialiseState(State):
 
         s.playingBackground = GameBackground(s.background)
         s.startScreenBackground = StartingBackground(s.background)
+        s.selectModeBackground = SelectModeBackground(s.background)
 
         s.buttonDirector = ButtonDirector()
         s.startScreenSprites = SpriteGroup(
@@ -123,8 +130,14 @@ class InitialiseState(State):
             ]
         )
 
+        s.selectModeSprites = SpriteGroup(
+            [
+                *s.buttonDirector.createSelectModeButtons(),
+                *s.buttonDirector.createBackButton(),
+            ]
+        )
+
         s.boardBuilder.reset()
-        s.loadFromSave = False
 
     @staticmethod
     def run():
@@ -139,7 +152,7 @@ class GameRunningState(InitialiseState):
 
     @staticmethod
     def run() -> dict:
-        s = GameRunningState
+        s = InitialiseState
         s.display.setBackgroundSet(s.playingBackground.getSet())
         s.display.setBackground(s.playingBackground.getBackground())
         s.display.setSprites(s.gameSprites)
@@ -160,6 +173,14 @@ class GameRunningState(InitialiseState):
                     spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
                 ]
                 for sprite in clickedSprites:
+                    sprite.pressDown()
+            if event.type == pg.MOUSEBUTTONUP:
+                pos = pg.mouse.get_pos()
+                clickedSprites = [
+                    spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
+                ]
+                for sprite in clickedSprites:
+                    sprite.stopPressDown()
                     if isinstance(sprite, Piece):
                         s.selectPieceTurn.execute(sprite)
                     elif isinstance(sprite, Tile):
@@ -169,15 +190,15 @@ class GameRunningState(InitialiseState):
                         else:
                             print("movePieceTurn")
                             s.movePieceTurn.execute(sprite)
-
-            if event.type == pg.MOUSEBUTTONUP:
-                pos = pg.mouse.get_pos()
-                clickedSprites = [
-                    spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
-                ]
-                for sprite in clickedSprites:
-                    if isinstance(sprite, Button):
-                        s.undoTurn.execute()
+                    elif isinstance(sprite, Button):
+                        if sprite.getFileName() == TriggerKey.UNDO:
+                            s.undoTurn.execute()
+                        elif sprite.getFileName() == TriggerKey.BACK:
+                            s.director.exportSaveFile(s.board)
+                            return {
+                                "quit": False,
+                                "nextState": StartScreenState,
+                            }
 
             if event.type == Events.TAKE_PIECE_EVENT:
                 print("Events.TAKE_PIECE_EVENT")
@@ -194,8 +215,8 @@ class GameRunningState(InitialiseState):
             if event.type == Events.CHECK_EVENT:
                 print("Events.CHECK_EVENT")
                 s.isInCheck = True
-                s.isBoardInCheckMateTurn.execute()
                 s.notification.push("Check!")
+                s.isBoardInCheckMateTurn.execute()
 
             if event.type == Events.STOP_CHECK_EVENT:
                 print("Events.STOP_CHECK_EVENT")
@@ -228,15 +249,15 @@ class GameRunningState(InitialiseState):
         }
 
 
-class NewScreenState(InitialiseState):
+class StartScreenState(InitialiseState):
 
     @staticmethod
     def initialise():
-        raise Exception("NewScreenState initialise() not implemented")
+        raise Exception("StartScreenState initialise() not implemented")
 
     @staticmethod
     def run() -> dict:
-        s = GameRunningState
+        s = InitialiseState
         s.display.setBackgroundSet(s.startScreenBackground.getSet())
         s.display.setBackground(s.startScreenBackground.getBackground())
         s.display.setSprites(s.startScreenSprites)
@@ -255,15 +276,25 @@ class NewScreenState(InitialiseState):
                     spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
                 ]
                 for sprite in clickedSprites:
+                    sprite.pressDown()
+            if event.type == pg.MOUSEBUTTONUP:
+                pos = pg.mouse.get_pos()
+                clickedSprites = [
+                    spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
+                ]
+                for sprite in clickedSprites:
+                    sprite.stopPressDown()
                     if isinstance(sprite, Button):
                         s.notification.clear()
 
                         # New game
                         if sprite.getFileName() == TriggerKey.NEW:
-                            s.notification.push("Creating new game...")
-                            s.director.createStandardBoard(s.boardBuilder)
+                            return {
+                                "quit": False,
+                                "nextState": SelectModeScreenState,
+                            }
 
-                        # Load game
+                        # Load game if save file exists
                         elif (
                             sprite.getFileName() == TriggerKey.LOAD
                             and sprite.isEnabled()
@@ -271,57 +302,28 @@ class NewScreenState(InitialiseState):
                             s.notification.push("Loading save...")
 
                             s.director.createStandardBoardFromSaveData(s.boardBuilder)
-                            s.loadFromSave = True
 
-                        # If no save file exists
-                        elif (
-                            sprite.getFileName() == TriggerKey.LOAD
-                            and not sprite.isEnabled()
-                        ):
-                            return {
-                                "quit": False,
-                                "nextState": NewScreenState,
-                            }
+                            s.board = s.boardBuilder.getBoard()
 
-                        s.board = s.boardBuilder.getBoard()
+                            s.gameSprites = SpriteGroup(
+                                [
+                                    *s.board.getTiles(),
+                                    *s.board.getPieces(),
+                                    *s.buttonDirector.createUndoButton(),
+                                    *s.buttonDirector.createBackButton(),
+                                ]
+                            )
 
-                        s.gameSprites = SpriteGroup(
-                            [
-                                *s.board.getTiles(),
-                                *s.board.getPieces(),
-                                *s.buttonDirector.createUndoButton(),
-                            ]
-                        )
+                            s.currentPlayerSurface.setCurrentPlayer(
+                                s.board.getCurrentPlayer().getName()
+                            )
 
-                        # print(f"Number of knights: {len(s.board.getKnights())}")
-                        # print([str(knight) for knight in s.board.getKnights()])
+                            s.selectPieceTurn = SelectPieceTurn(s.board)
+                            s.movePieceTurn = MovePieceTurn(s.board)
+                            s.isBoardInCheckMateTurn = IsBoardInCheckMateTurn(s.board)
+                            s.movePieceCheckTurn = MovePieceCheckTurn(s.board)
+                            s.undoTurn = UndoTurn(s.board)
 
-                        # print(f"Number of rooks: {len(s.board.getRooks())}")
-                        # print([str(rook) for rook in s.board.getRooks()])
-
-                        # print(f"Number of pawns: {len(s.board.getPawns())}")
-                        # print([str(pawn) for pawn in s.board.getPawns()])
-
-                        # print(f"Number of bishops: {len(s.board.getBishops())}")
-                        # print([str(bishop) for bishop in s.board.getBishops()])
-
-                        # print(f"Number of queens: {len(s.board.getQueens())}")
-                        # print([str(queen) for queen in s.board.getQueens()])
-
-                        # print(f"Number of kings: {len(s.board.getKings())}")
-                        # print([str(king) for king in s.board.getKings()])
-
-                        s.currentPlayerSurface.setCurrentPlayer(
-                            s.board.getCurrentPlayer().getName()
-                        )
-
-                        s.selectPieceTurn = SelectPieceTurn(s.board)
-                        s.movePieceTurn = MovePieceTurn(s.board)
-                        s.isBoardInCheckMateTurn = IsBoardInCheckMateTurn(s.board)
-                        s.movePieceCheckTurn = MovePieceCheckTurn(s.board)
-                        s.undoTurn = UndoTurn(s.board)
-
-                        if s.loadFromSave:
                             for player in s.board.getPlayers():
                                 s.playerSurfacesDict[player.getName()].incrementPoints(
                                     player.getPoints()
@@ -333,17 +335,114 @@ class NewScreenState(InitialiseState):
                             if s.board.isInCheck():
                                 s.eventManager.post(event=Events.CHECK_EVENT)
 
-                        s.notification.push("Starting game!")
+                            s.notification.push("Starting game!")
 
-                        return {
-                            "quit": False,
-                            "nextState": GameRunningState,
-                        }
+                            return {
+                                "quit": False,
+                                "nextState": GameRunningState,
+                            }
 
         s.clock.tick(60)
         s.eventManager.listen()
 
         return {
             "quit": False,
-            "nextState": NewScreenState,
+            "nextState": StartScreenState,
+        }
+
+
+class SelectModeScreenState(InitialiseState):
+
+    @staticmethod
+    def initialise():
+        raise Exception("SelectModeScreenState initialise() not implemented")
+
+    @staticmethod
+    def run() -> dict:
+        s = InitialiseState
+        s.display.setBackgroundSet(s.selectModeBackground.getSet())
+        s.display.setBackground(s.selectModeBackground.getBackground())
+        s.display.setSprites(s.selectModeSprites)
+        s.display.updateDisplay()
+        s.display.clear()
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                return {
+                    "quit": True,
+                    "nextState": None,
+                }
+            if event.type == pg.MOUSEBUTTONDOWN:
+                pos = pg.mouse.get_pos()
+                clickedSprites = [
+                    spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
+                ]
+                for sprite in clickedSprites:
+                    sprite.pressDown()
+            if event.type == pg.MOUSEBUTTONUP:
+                pos = pg.mouse.get_pos()
+                clickedSprites = [
+                    spr for spr in s.display.getSprites() if spr.rect.collidepoint(pos)
+                ]
+                for sprite in clickedSprites:
+                    sprite.stopPressDown()
+                    if isinstance(sprite, Button):
+                        s.notification.clear()
+
+                        # New knights only game
+                        if sprite.getFileName() == TriggerKey.ALL_KNIGHTS:
+                            s.notification.push("Creating new standard game...")
+                            s.director.createNewStandardBoardWithKnightsOnly(
+                                s.boardBuilder
+                            )
+                            s.boardCreated = True
+
+                        # New standard game
+                        elif sprite.getFileName() == TriggerKey.STANDARD:
+                            s.notification.push("Creating new knights only game...")
+                            s.director.createNewStandardBoardFromConfig(s.boardBuilder)
+                            s.boardCreated = True
+
+                        # Go back to start screen
+                        elif sprite.getFileName() == TriggerKey.BACK:
+                            return {
+                                "quit": False,
+                                "nextState": StartScreenState,
+                            }
+
+                        if s.boardCreated:
+                            s.board = s.boardBuilder.getBoard()
+
+                            s.gameSprites = SpriteGroup(
+                                [
+                                    *s.board.getTiles(),
+                                    *s.board.getPieces(),
+                                    *s.buttonDirector.createUndoButton(),
+                                    *s.buttonDirector.createBackButton(),
+                                ]
+                            )
+
+                            s.currentPlayerSurface.setCurrentPlayer(
+                                s.board.getCurrentPlayer().getName()
+                            )
+
+                            s.selectPieceTurn = SelectPieceTurn(s.board)
+                            s.movePieceTurn = MovePieceTurn(s.board)
+                            s.isBoardInCheckMateTurn = IsBoardInCheckMateTurn(s.board)
+                            s.movePieceCheckTurn = MovePieceCheckTurn(s.board)
+                            s.undoTurn = UndoTurn(s.board)
+
+                            s.notification.push("Starting game!")
+
+                            return {
+                                "quit": False,
+                                "nextState": GameRunningState,
+                            }
+
+        s.clock.tick(60)
+        s.eventManager.listen()
+
+        return {
+            "quit": False,
+            "nextState": SelectModeScreenState,
         }
